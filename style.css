@@ -1,148 +1,139 @@
-/* ===== GLOBAL RESET ===== */
-* {
-  box-sizing: border-box;
-}
-
+/* ================== GLOBAL ================== */
 body {
   margin: 0;
-  padding: 30px 18px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #141e30, #1f2a38);
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(180deg, #0B1C2D 0%, #0F243A 100%);
+  color: #ffffff;
   display: flex;
   justify-content: center;
-  align-items: center;
+  padding: 30px 15px;
 }
 
-/* ===== MAIN CARD ===== */
 .app {
   width: 100%;
-  max-width: 650px;
-  background: rgba(36, 52, 71, 0.95);
+  max-width: 600px;
+  background: rgba(255,255,255,0.03);
   padding: 30px;
-  border-radius: 22px;
-  border: 1px solid rgba(201, 162, 39, 0.4);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
 }
 
-/* ===== TITLE ===== */
+/* ================== TITLE ================== */
 h1 {
   text-align: center;
   color: #C9A227;
   margin-bottom: 25px;
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: 1px;
-}
-
-/* ===== TEXTAREA ===== */
-textarea {
-  width: 100%;
-  height: 130px;
-  background: #2b3c4f;
-  color: white;
-  border: 1px solid rgba(201, 162, 39, 0.5);
-  border-radius: 14px;
-  padding: 15px;
-  font-size: 15px;
-  resize: none;
-  margin-bottom: 18px;
-  transition: 0.2s ease;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #C9A227;
-  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
-}
-
-/* ===== SELECT ===== */
-.controls {
-  margin-bottom: 15px;
-}
-
-select {
-  width: 100%;
-  padding: 12px;
-  background: #2b3c4f;
-  color: white;
-  border: 1px solid rgba(201, 162, 39, 0.5);
-  border-radius: 14px;
-  font-size: 14px;
-  transition: 0.2s ease;
-}
-
-select:focus {
-  outline: none;
-  border-color: #C9A227;
-}
-
-/* ===== BUTTONS ===== */
-.generate-btn {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #C9A227, #e6c35c);
-  color: #1F2A38;
-  font-weight: 700;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  margin-top: 10px;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 
+/* ================== SELECT ================== */
+select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #C9A227;
+  background: #0F243A;
+  color: white;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ================== TEXTAREA ================== */
+textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(201,162,39,0.5);
+  background: rgba(255,255,255,0.05);
+  color: white;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  margin-bottom: 15px;
+}
+
+textarea:focus {
+  border-color: #C9A227;
+}
+
+/* ================== BUTTONS ================== */
+.generate-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid #C9A227;
+  background: #0F243A;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.3s ease;
+}
+
 .generate-btn:hover {
+  box-shadow: 0 0 15px rgba(201,162,39,0.5);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(201, 162, 39, 0.4);
 }
 
-.generate-btn:active {
-  transform: scale(0.98);
+/* ================== RECORD BUTTON ================== */
+#recordBtn {
+  margin-top: 10px;
 }
 
-/* ===== RESULTS AREA ===== */
+/* ================== AUDIO ================== */
+audio {
+  margin-top: 15px;
+  border-radius: 12px;
+}
+
+/* ================== ANALYSIS BOX ================== */
+.analysis-box {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #C9A227;
+  border-radius: 16px;
+  background: rgba(201,162,39,0.08);
+  font-size: 14px;
+}
+
+/* ================== REPLIES ================== */
 .results {
   margin-top: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
 }
 
-/* ===== REPLY BOX ===== */
 .reply-box {
-  background: #2b3c4f;
-  padding: 16px;
+  padding: 15px;
   border-radius: 16px;
-  border: 1px solid rgba(201, 162, 39, 0.4);
+  border: 1px solid #C9A227;
+  margin-bottom: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.04);
+  transition: all 0.3s ease;
 }
 
 .reply-box:hover {
-  background: #344a63;
-  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(201,162,39,0.4);
+  transform: translateY(-3px);
 }
 
-.reply-box p {
-  margin: 0;
-  line-height: 1.6;
-  font-size: 14.5px;
+/* ================== PREMIUM MODAL ================== */
+#premiumModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
 }
 
-/* ===== MOBILE OPTIMIZATION ===== */
-@media (max-width: 480px) {
-  body {
-    padding: 20px 12px;
-  }
-
-  .app {
-    padding: 22px;
-  }
-
-  h1 {
-    font-size: 18px;
-  }
+#premiumModal div {
+  background: #0F243A;
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid #C9A227;
+  max-width: 400px;
+  text-align: center;
 }
