@@ -26,31 +26,20 @@
     <button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
   </div>
 
-  <audio id="audioPlayback" controls style="width:100%; margin-top:10px; display:none;"></audio>
-
-  <button class="generate-btn" onclick="generateReply()">Generate Replies</button>
+  <button class="generate-btn" onclick="generateReply()">
+    Generate Replies
+  </button>
 
   <div class="results" id="outputArea"></div>
 
-  <div class="share-section">
-    <button class="generate-btn" onclick="nativeShare()">Share (All Apps)</button>
-    <button class="generate-btn" onclick="shareWhatsApp()">Send to WhatsApp</button>
-    <button class="generate-btn" onclick="shareFacebook()">Share to Facebook</button>
-    <button class="generate-btn" onclick="shareLinkedIn()">Share to LinkedIn</button>
-  </div>
 </div>
 
 <script>
 
-// ================= GLOBAL =================
-let selectedText = "";
-let mediaRecorder = null;
-let audioChunks = [];
-let streamRef = null;
-
 // ================= SMART GENERATOR =================
-function generateReply() {
+let selectedText = "";
 
+function generateReply() {
   const mood = document.getElementById("tone").value;
   const outputArea = document.getElementById("outputArea");
   const inputText = document.getElementById("userInput").value.trim();
@@ -103,15 +92,10 @@ function generateReply() {
 
   const shuffled = variations[mood].sort(() => 0.5 - Math.random());
 
-  shuffled.slice(0,3).forEach(reply => {
-
+  shuffled.slice(0, 3).forEach(reply => {
     const box = document.createElement("div");
     box.className = "reply-box";
-
-    const p = document.createElement("p");
-    p.textContent = reply;
-
-    box.appendChild(p);
+    box.textContent = reply;
 
     box.onclick = function() {
       selectedText = reply;
@@ -124,74 +108,47 @@ function generateReply() {
   });
 }
 
-// ================= SHARE =================
-function nativeShare() {
-  if (!selectedText) return alert("Select a reply first.");
-  if (navigator.share) {
-    navigator.share({ title: "DMGlow Reply", text: selectedText });
-  } else {
-    alert("Sharing not supported on this device.");
-  }
-}
 
-function shareWhatsApp() {
-  if (!selectedText) return alert("Select a reply first.");
-  window.open("https://wa.me/?text=" + encodeURIComponent(selectedText), "_blank");
-}
-
-function shareFacebook() {
-  if (!selectedText) return alert("Select a reply first.");
-  window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(selectedText), "_blank");
-}
-
-function shareLinkedIn() {
-  if (!selectedText) return alert("Select a reply first.");
-  window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText), "_blank");
-}
-
-// ================= VOICE RECORDING =================
+// ================= SPEECH TO TEXT =================
 const recordBtn = document.getElementById("recordBtn");
-const audioPlayback = document.getElementById("audioPlayback");
+const userInput = document.getElementById("userInput");
 
-recordBtn.addEventListener("click", async () => {
+let recognition;
+let isRecording = false;
 
-  if (!mediaRecorder || mediaRecorder.state === "inactive") {
+// Check browser support
+if ('webkitSpeechRecognition' in window) {
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = "en-US";
 
-    try {
-      streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    userInput.value = transcript;
+  };
 
-      mediaRecorder = new MediaRecorder(streamRef);
-      audioChunks = [];
+  recognition.onend = function() {
+    recordBtn.textContent = "🎤 Record Voice";
+    isRecording = false;
+  };
 
-      mediaRecorder.start();
-      recordBtn.textContent = "⏹ Stop Recording";
+} else {
+  alert("Speech recognition not supported in this browser. Use Chrome.");
+}
 
-      mediaRecorder.ondataavailable = e => {
-        audioChunks.push(e.data);
-      };
+recordBtn.addEventListener("click", function() {
+  if (!recognition) return;
 
-      mediaRecorder.onstop = () => {
-
-        const blob = new Blob(audioChunks, { type: "audio/webm" });
-        const audioURL = URL.createObjectURL(blob);
-
-        audioPlayback.style.display = "block";
-        audioPlayback.src = audioURL;
-
-        recordBtn.textContent = "🎤 Record Voice";
-
-        // stop mic completely
-        streamRef.getTracks().forEach(track => track.stop());
-      };
-
-    } catch (err) {
-      alert("Microphone permission denied or not supported.");
-    }
-
+  if (!isRecording) {
+    recognition.start();
+    recordBtn.textContent = "⏹ Listening...";
+    isRecording = true;
   } else {
-    mediaRecorder.stop();
+    recognition.stop();
+    recordBtn.textContent = "🎤 Record Voice";
+    isRecording = false;
   }
-
 });
 
 </script>
