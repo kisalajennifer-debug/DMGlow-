@@ -182,8 +182,13 @@ pool=[...replyBank[emotion]];
 
 pool.sort(()=>0.5-Math.random());
 
-pool.slice(0,3).forEach(reply=>{
+const replyLimit = isPremium ? 3 : 1;
 
+if(!isPremium){
+  document.getElementById("premiumModal").style.display="flex";
+}
+
+pool.slice(0,replyLimit).forEach(reply=>{
 const modified=applyMode(reply,mode);
 usedReplies.add(reply);
 
