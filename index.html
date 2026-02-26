@@ -145,6 +145,19 @@ if(mode==="business")
 return reply+" Execution matters more than emotion.";
 
 return reply;
+}function unlockPremium(){
+  isPremium = true;
+  localStorage.setItem("DMGlowPremium","true");
+  closeModal();
+  alert("Premium Activated.");
+}
+
+function closeModal(){
+  document.getElementById("premiumModal").style.display="none";
+}
+
+if(localStorage.getItem("DMGlowPremium")==="true"){
+  isPremium = true;
 }
 
 // ================= GENERATOR =================
