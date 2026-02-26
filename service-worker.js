@@ -16,4 +16,6 @@ self.addEventListener("fetch", event => {
       return response || fetch(event.request);
     })
   );
-});
+});if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js');
+}
