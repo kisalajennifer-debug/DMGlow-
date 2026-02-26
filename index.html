@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>DMGlow Generator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DMGlow Social Reply Engine</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -10,7 +12,7 @@
   <div class="app">
     <h1>DMGlow Social Reply Engine</h1>
 
-    <textarea id="userInput" placeholder="Paste the message you received..."></textarea>
+    <textarea id="userInput" placeholder="Paste the message you received or record voice..."></textarea>
 
     <div class="controls">
       <select id="tone">
@@ -20,6 +22,9 @@
         <option value="witty">Witty</option>
         <option value="mysterious">Mysterious</option>
       </select>
+
+      <button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
+      <audio id="audioPlayback" controls style="width:100%; margin-top:10px;"></audio>
     </div>
 
     <button class="generate-btn" onclick="generateReply()">
@@ -37,107 +42,155 @@
 
   </div>
 
-  <script>
-    let selectedText = "";
+<script>
 
-    function generateReply() {
-      const mood = document.getElementById("tone").value;
-      const outputArea = document.getElementById("outputArea");
-      const inputText = document.getElementById("userInput").value;
+let selectedText = "";
 
-      if (!inputText) {
-        alert("Please enter a message first.");
-        return;
-      }
+// ================= UNIQUE SMART GENERATOR =================
+function generateReply() {
+  const mood = document.getElementById("tone").value;
+  const outputArea = document.getElementById("outputArea");
+  const inputText = document.getElementById("userInput").value.trim();
 
-      const replies = {
-        chill: [
-          `Haha I see you 👀 but what made you say "${inputText}"?`,
-          `Okay now I'm curious… explain "${inputText}" a little more.`,
-          `Wait wait 😂 "${inputText}" has a story behind it.`
-        ],
-        playful: [
-          `"${inputText}"? Bold of you 😌`,
-          `Oh so we're starting like that? Interesting.`,
-          `You woke up and chose confidence today huh?`
-        ],
-        confident: [
-          `I don’t usually entertain messages like "${inputText}"… but I’ll allow it.`,
-          `Interesting energy. I respect it.`,
-          `You’re either brave… or very sure of yourself.`
-        ],
-        witty: [
-          `"${inputText}" had main character energy.`,
-          `Plot twist… I actually liked that.`,
-          `You're testing the waters with that one 😂`
-        ],
-        mysterious: [
-          `"${inputText}"… intriguing.`,
-          `You might be onto something.`,
-          `Continue. I’m listening.`
-        ]
+  if (!inputText) {
+    alert("Please enter or record a message first.");
+    return;
+  }
+
+  const variations = {
+    chill: [
+      `Hmm... "${inputText}"? I like that energy.`,
+      `That’s interesting 👀 Tell me more about "${inputText}".`,
+      `"${inputText}" sounds like there’s a story there.`,
+      `Okay okay… I wasn’t expecting that one.`,
+      `Now you’ve got my attention.`
+    ],
+    playful: [
+      `"${inputText}"? Oh we’re being bold today 😌`,
+      `Should I be impressed or concerned?`,
+      `Look at you starting something.`,
+      `You really typed that with confidence huh?`,
+      `Dangerous energy detected 😂`
+    ],
+    confident: [
+      `"${inputText}" — I respect direct energy.`,
+      `I don’t entertain everything… but this? Not bad.`,
+      `Confidence suits you.`,
+      `You knew exactly what you were doing there.`,
+      `I see intention behind that.`
+    ],
+    witty: [
+      `"${inputText}" just unlocked a plot twist.`,
+      `Main character moment right there.`,
+      `That line deserves a sequel.`,
+      `Unexpected… but entertaining.`,
+      `You might be onto something clever.`
+    ],
+    mysterious: [
+      `"${inputText}"… intriguing.`,
+      `You don’t say things like that casually.`,
+      `Continue. I’m listening.`,
+      `There’s depth behind that message.`,
+      `Noted. Very noted.`
+    ]
+  };
+
+  outputArea.innerHTML = "";
+  selectedText = "";
+
+  // Shuffle array to avoid repetition
+  const shuffled = variations[mood].sort(() => 0.5 - Math.random());
+
+  shuffled.slice(0, 3).forEach(reply => {
+    const box = document.createElement("div");
+    box.className = "reply-box";
+
+    const p = document.createElement("p");
+    p.textContent = reply;
+
+    box.appendChild(p);
+
+    box.onclick = function() {
+      selectedText = reply;
+      document.querySelectorAll(".reply-box")
+        .forEach(b => b.style.border = "1px solid #C9A227");
+      box.style.border = "2px solid white";
+    };
+
+    outputArea.appendChild(box);
+  });
+}
+
+// ================= SHARE =================
+function nativeShare() {
+  if (!selectedText) return alert("Select a reply first.");
+
+  if (navigator.share) {
+    navigator.share({
+      title: "DMGlow Reply",
+      text: selectedText
+    });
+  } else {
+    alert("Sharing not supported on this device.");
+  }
+}
+
+function shareWhatsApp() {
+  if (!selectedText) return alert("Select a reply first.");
+  window.open("https://wa.me/?text=" + encodeURIComponent(selectedText), "_blank");
+}
+
+function shareFacebook() {
+  if (!selectedText) return alert("Select a reply first.");
+  window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(selectedText), "_blank");
+}
+
+function shareLinkedIn() {
+  if (!selectedText) return alert("Select a reply first.");
+  window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText), "_blank");
+}
+
+// ================= VOICE RECORDING =================
+let mediaRecorder;
+let audioChunks = [];
+
+const recordBtn = document.getElementById("recordBtn");
+const audioPlayback = document.getElementById("audioPlayback");
+
+recordBtn.addEventListener("click", async () => {
+
+  if (!mediaRecorder || mediaRecorder.state === "inactive") {
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.start();
+      recordBtn.textContent = "⏹ Stop Recording";
+
+      mediaRecorder.ondataavailable = event => {
+        audioChunks.push(event.data);
       };
 
-      outputArea.innerHTML = "";
-      selectedText = "";
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        audioChunks = [];
+        const audioURL = URL.createObjectURL(audioBlob);
+        audioPlayback.src = audioURL;
+        recordBtn.textContent = "🎤 Record Voice";
+      };
 
-      const selectedReplies = replies[mood];
-
-      selectedReplies.forEach(reply => {
-        const box = document.createElement("div");
-        box.className = "reply-box";
-
-        const p = document.createElement("p");
-        p.textContent = reply;
-
-        box.appendChild(p);
-
-        box.onclick = function() {
-          selectedText = reply;
-          document.querySelectorAll(".reply-box")
-            .forEach(b => b.style.border = "1px solid #C9A227");
-          box.style.border = "2px solid white";
-        };
-
-        outputArea.appendChild(box);
-      });
+    } catch (error) {
+      alert("Microphone permission denied.");
     }
 
-    function nativeShare() {
-      if (!selectedText) {
-        alert("Select a reply first.");
-        return;
-      }
+  } else {
+    mediaRecorder.stop();
+  }
 
-      if (navigator.share) {
-        navigator.share({
-          title: "DMGlow Reply",
-          text: selectedText
-        });
-      } else {
-        alert("Sharing not supported on this device.");
-      }
-    }
+});
 
-    function shareWhatsApp() {
-      if (!selectedText) return alert("Select a reply first.");
-      const url = "https://wa.me/?text=" + encodeURIComponent(selectedText);
-      window.open(url, "_blank");
-    }
-
-    function shareFacebook() {
-      if (!selectedText) return alert("Select a reply first.");
-      const url = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(selectedText);
-      window.open(url, "_blank");
-    }
-
-    function shareLinkedIn() {
-      if (!selectedText) return alert("Select a reply first.");
-      const url = "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText);
-      window.open(url, "_blank");
-    }
-
-  </script>
+</script>
 
 </body>
 </html>
