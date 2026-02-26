@@ -1,48 +1,43 @@
-let currentPlan = "free";
-let usageCount = 0;
+import express from "express";
+import cors from "cors";
+import OpenAI from "openai";
 
-const limits = {
-  free: 3,
-  pro: 10,
-  premium: Infinity
-};
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-function setPlan(plan) {
-  currentPlan = plan;
-  usageCount = 0;
-  document.getElementById("usage").innerText = 
-    `Plan: ${plan.toUpperCase()} | Used: 0/${limits[plan] === Infinity ? "∞" : limits[plan]}`;
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-function generateMessage() {
-  if (usageCount >= limits[currentPlan]) {
-    document.getElementById("output").innerHTML =
-      `<span style="color:#d4af37;">Upgrade to continue glowing ✨</span>`;
-    return;
+app.post("/generate", async (req, res) => {
+  try {
+    const { message, mode } = req.body;
+
+    const prompt = `
+You are DMGlow Emotional Intelligence Engine.
+Tone mode: ${mode}
+
+Analyze emotional intent and generate 3 calibrated high-value replies.
+
+Message:
+"${message}"
+`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7
+    });
+
+    res.json({ reply: completion.choices[0].message.content });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
   }
+});
 
-  usageCount++;
-  updateUsage();
-
-  const output = document.getElementById("output");
-  output.innerHTML = "";
-  output.classList.add("glow");
-
-  const text = "Your message is glowing with elegance and confidence.";
-
-  typeWriter(text, output, 0);
-}
-
-function updateUsage() {
-  document.getElementById("usage").innerText =
-    `Plan: ${currentPlan.toUpperCase()} | Used: ${usageCount}/${limits[currentPlan] === Infinity ? "∞" : limits[currentPlan]}`;
-}
-
-function typeWriter(text, element, i) {
-  if (i < text.length) {
-    element.innerHTML += text.charAt(i);
-    setTimeout(() => typeWriter(text, element, i + 1), 25);
-  } else {
-    element.classList.remove("glow");
-  }
-}
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
