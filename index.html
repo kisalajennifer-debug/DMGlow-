@@ -235,44 +235,34 @@ return reply;
 
 /* ================= GENERATOR ================= */
 
-function generateReply(){
+async function generateReply(){
 
 const input=document.getElementById("userInput").value.trim();
 if(!input){ alert("Enter or speak a message first."); return; }
 
-if(!isPremium && !trialActive){
-document.getElementById("premiumModal").style.display="flex";
-return;
-}
-
-const emotion=detectEmotion(input);
 const mode=document.getElementById("mode").value;
 
-document.getElementById("analysisBox").innerHTML=
-"<strong>Detected Emotional Core:</strong> "+emotion+
-"<br><strong>Response Mode:</strong> "+mode;
+const response = await fetch("https://YOUR-BACKEND-URL/generate", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    message: input,
+    mode: mode
+  })
+});
 
-let pool=[...replyBank[emotion]];
-pool.sort(()=>0.5-Math.random());
-
-const limit = isPremium ? 3 : 2;
+const data = await response.json();
 
 const output=document.getElementById("outputArea");
 output.innerHTML="";
 
-pool.slice(0,limit).forEach(reply=>{
-let box=document.createElement("div");
+const box=document.createElement("div");
 box.className="reply-box";
-box.textContent=applyMode(reply,mode);
-
-box.onclick=function(){
-document.querySelectorAll(".reply-box")
-.forEach(b=>b.classList.remove("selected"));
-box.classList.add("selected");
-};
+box.textContent=data.reply;
 
 output.appendChild(box);
-});
 }
 
 /* ================= SPEECH TO TEXT ================= */
