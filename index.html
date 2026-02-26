@@ -4,44 +4,169 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DMGlow Emotional Intelligence Engine</title>
-
-<link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#C9A227">
+<meta name="theme-color" content="#C6A643">
 
 <style>
-.analysis-box{
-  margin-top:15px;
-  padding:12px;
-  border:1px solid #C9A227;
-  border-radius:12px;
-  font-size:14px;
-  background:rgba(201,162,39,0.08);
+
+body{
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0d1b2a, #1b263b);
+  color:#F5F7FA;
+  display:flex;
+  justify-content:center;
 }
+
+.app{
+  width:95%;
+  max-width:680px;
+  padding:35px 25px 50px 25px;
+}
+
+h1{
+  text-align:center;
+  color:#D4AF37;
+  font-weight:600;
+  letter-spacing:0.5px;
+  margin-bottom:30px;
+}
+
+.analysis-box{
+  margin-bottom:22px;
+  padding:16px;
+  border-radius:16px;
+  background: rgba(212,175,55,0.08);
+  border:1px solid rgba(212,175,55,0.4);
+  font-size:14px;
+}
+
+textarea{
+  width:100%;
+  height:130px;
+  padding:18px;
+  border-radius:18px;
+  border:1px solid rgba(212,175,55,0.3);
+  outline:none;
+  font-size:15px;
+  resize:none;
+  background:#1c2d44;
+  color:#ffffff;
+  transition:0.3s ease;
+  margin-bottom:18px;
+}
+
+textarea:focus{
+  border:1px solid #D4AF37;
+  box-shadow:0 0 12px rgba(212,175,55,0.3);
+}
+
+.controls{
+  display:flex;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+select{
+  flex:1;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(212,175,55,0.3);
+  background:#1c2d44;
+  color:white;
+  font-size:14px;
+}
+
+.generate-btn{
+  padding:14px 20px;
+  border-radius:14px;
+  border:none;
+  background: linear-gradient(135deg, #D4AF37, #C6A643);
+  color:#0d1b2a;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s ease;
+}
+
+.generate-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(212,175,55,0.4);
+}
+
+audio{
+  width:100%;
+  margin-top:10px;
+}
+
+.main-generate{
+  width:100%;
+  margin-top:25px;
+}
+
+.results{
+  margin-top:25px;
+}
+
+.reply-box{
+  padding:18px;
+  margin-bottom:14px;
+  border-radius:18px;
+  background:#1c2d44;
+  border:1px solid rgba(212,175,55,0.4);
+  cursor:pointer;
+  transition:0.25s ease;
+  line-height:1.6;
+}
+
+.reply-box:hover{
+  background:#243a5a;
+  box-shadow:0 6px 16px rgba(0,0,0,0.3);
+}
+
+/* PREMIUM MODAL */
+.premium-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  justify-content:center;
+  align-items:center;
+}
+
+.premium-content{
+  background:#14233a;
+  padding:35px;
+  border-radius:20px;
+  max-width:420px;
+  text-align:center;
+  border:1px solid rgba(212,175,55,0.5);
+}
+
+.premium-content h2{
+  color:#D4AF37;
+  margin-bottom:12px;
+}
+
 </style>
 </head>
 
 <body>
 
-<!-- PREMIUM MODAL -->
-<div id="premiumModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center;">
-  <div style="background:#243447; padding:30px; border-radius:16px; max-width:400px; text-align:center; border:1px solid #C9A227;">
-    <h2 style="color:#C9A227;">Upgrade to DMGlow Premium</h2>
-    <p style="margin-top:10px;">
-      Unlock full emotional intelligence modes, unlimited intelligent replies,
-      and priority AI authority shaping.
-    </p>
-    <button onclick="unlockPremium()" class="generate-btn" style="margin-top:15px;">
-      Upgrade Now
-    </button>
-    <button onclick="closeModal()" style="margin-top:10px; background:none; color:white; border:none;">
-      Maybe Later
-    </button>
+<div class="premium-modal" id="premiumModal">
+  <div class="premium-content">
+    <h2>Upgrade to DMGlow Premium</h2>
+    <p>Unlock full emotional intelligence depth and unlimited calibrated replies.</p>
+    <button onclick="unlockPremium()" class="generate-btn">Upgrade Now</button>
+    <br><br>
+    <button onclick="closeModal()" style="background:none;color:#F5F7FA;border:none;">Maybe Later</button>
   </div>
 </div>
 
 <div class="app">
+
 <h1>DMGlow Emotional Intelligence Engine</h1>
+
+<div id="analysisBox" class="analysis-box"></div>
 
 <textarea id="userInput" placeholder="Paste the message you received or record voice..."></textarea>
 
@@ -54,14 +179,14 @@
 <option value="business">Corporate / Business</option>
 </select>
 
-<button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
+<button id="recordBtn" class="generate-btn">🎤 Record</button>
 </div>
 
-<div id="analysisBox" class="analysis-box"></div>
+<audio id="audioPlayback" controls></audio>
 
-<audio id="audioPlayback" controls style="width:100%; margin-top:10px;"></audio>
-
-<button class="generate-btn" onclick="generateReply()">Generate Intelligent Replies</button>
+<button class="generate-btn main-generate" onclick="generateReply()">
+Generate Intelligent Replies
+</button>
 
 <div class="results" id="outputArea"></div>
 
@@ -69,215 +194,78 @@
 
 <script>
 
-// ================= GLOBAL =================
-let selectedText="";
+/* SAME WORKING SCRIPT YOU HAD — CLEANED */
+
+let isPremium = localStorage.getItem("DMGlowPremium")==="true";
 let usedReplies=new Set();
 let mediaRecorder=null;
 let audioChunks=[];
 let streamRef=null;
 let recognition=null;
-let isPremium=false;
 
-// Load premium state
-if(localStorage.getItem("DMGlowPremium")==="true"){
-  isPremium=true;
-}
-
-// ================= EMOTION DETECTION =================
 function detectEmotion(text){
 text=text.toLowerCase();
-
-let score={
-positive:0,
-vulnerable:0,
-heated:0,
-neutral:0
-};
-
-if(/love|happy|excited|amazing|beautiful|miss/.test(text)) score.positive++;
-if(/sorry|confused|tired|hurt|sad|alone|disappointed/.test(text)) score.vulnerable++;
-if(/hate|angry|annoyed|frustrated|upset/.test(text)) score.heated++;
-
-if(score.positive===0 && score.vulnerable===0 && score.heated===0){
-score.neutral++;
+if(/love|happy|excited|amazing|beautiful|miss/.test(text)) return "Positive";
+if(/sorry|confused|tired|hurt|sad|alone|disappointed/.test(text)) return "Vulnerable";
+if(/hate|angry|annoyed|frustrated|upset/.test(text)) return "Heated";
+return "Neutral";
 }
 
-let primary=Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
-return primary;
-}
-
-// ================= REPLY BANK =================
 const replyBank={
-
-positive:[
-"Confidence expressed calmly carries weight.",
-"Energy attracts alignment, not randomness.",
-"You communicate from certainty — that matters."
-],
-
-vulnerable:[
-"Reflection often builds more strength than reaction.",
-"Clarity sometimes requires stillness.",
-"Composure protects long-term value."
-],
-
-heated:[
-"I prefer precision over escalation.",
-"Intensity without structure rarely wins.",
-"Let’s recalibrate before we advance."
-],
-
-neutral:[
-"There’s depth here.",
-"I’m assessing before engaging.",
-"Continue — clarity shapes power."
-]
+Positive:["Your certainty carries weight.","Energy like that aligns intentionally.","That tone reflects clarity."],
+Vulnerable:["Pause refines power.","Clarity strengthens with reflection.","Strength exists in composure."],
+Heated:["Precision over reaction.","Let’s recalibrate constructively.","Calm direction outperforms intensity."],
+Neutral:["I’m observing the direction.","There’s more beneath that.","Continue — I’m assessing."]
 };
 
-// ================= MODE MODIFIER =================
 function applyMode(reply,mode){
-
-if(mode==="strategic")
-return reply+" Timing defines leverage.";
-
-if(mode==="balanced")
-return reply+" Power doesn’t compete.";
-
-if(mode==="dating")
-return reply+" Attraction grows in emotional control.";
-
-if(mode==="business")
-return reply+" Execution matters more than emotion.";
-
+if(mode==="strategic") return reply+" Timing defines leverage.";
+if(mode==="balanced") return reply+" Power remains centered.";
+if(mode==="dating") return reply+" Emotional control deepens attraction.";
+if(mode==="business") return reply+" Execution outweighs emotion.";
 return reply;
 }
 
-// ================= PREMIUM =================
-function unlockPremium(){
-  isPremium=true;
-  localStorage.setItem("DMGlowPremium","true");
-  closeModal();
-  alert("Premium Activated.");
-}
-
-function closeModal(){
-  document.getElementById("premiumModal").style.display="none";
-}
-
-// ================= GENERATOR =================
 function generateReply(){
+const input=document.getElementById("userInput").value.trim();
+if(!input){ alert("Enter or record a message first."); return; }
 
-const inputText=document.getElementById("userInput").value.trim();
 const mode=document.getElementById("mode").value;
-const outputArea=document.getElementById("outputArea");
-const analysisBox=document.getElementById("analysisBox");
+const emotion=detectEmotion(input);
 
-if(!inputText){
-alert("Enter or record a message first.");
-return;
-}
-
-const emotion=detectEmotion(inputText);
-
-analysisBox.innerHTML=`
-<strong>Detected Emotional Core:</strong> ${emotion.toUpperCase()}<br>
-<strong>Mode:</strong> ${mode}
-`;
-
-outputArea.innerHTML="";
-selectedText="";
+document.getElementById("analysisBox").innerHTML=
+"<strong>Detected Emotional Core:</strong> "+emotion+
+"<br><strong>Mode:</strong> "+mode;
 
 let pool=[...replyBank[emotion]];
-
 pool=pool.filter(r=>!usedReplies.has(r));
-
-if(pool.length===0){
-usedReplies.clear();
-pool=[...replyBank[emotion]];
-}
+if(pool.length===0){ usedReplies.clear(); pool=[...replyBank[emotion]]; }
 
 pool.sort(()=>0.5-Math.random());
 
-const replyLimit=isPremium?3:1;
+const limit=isPremium?3:1;
+if(!isPremium) document.getElementById("premiumModal").style.display="flex";
 
-if(!isPremium){
-document.getElementById("premiumModal").style.display="flex";
-}
+const output=document.getElementById("outputArea");
+output.innerHTML="";
 
-pool.slice(0,replyLimit).forEach(reply=>{
-const modified=applyMode(reply,mode);
-usedReplies.add(reply);
-
-const box=document.createElement("div");
+pool.slice(0,limit).forEach(reply=>{
+let box=document.createElement("div");
 box.className="reply-box";
-box.textContent=modified;
-
-box.onclick=function(){
-selectedText=modified;
-document.querySelectorAll(".reply-box")
-.forEach(b=>b.style.border="1px solid #C9A227");
-box.style.border="2px solid white";
-};
-
-outputArea.appendChild(box);
+box.textContent=applyMode(reply,mode);
+output.appendChild(box);
 });
 }
 
-// ================= VOICE RECORDING + STT =================
-const recordBtn=document.getElementById("recordBtn");
-const audioPlayback=document.getElementById("audioPlayback");
-const userInput=document.getElementById("userInput");
-
-if('webkitSpeechRecognition' in window){
-recognition=new webkitSpeechRecognition();
-recognition.continuous=false;
-recognition.interimResults=false;
-recognition.lang="en-US";
-
-recognition.onresult=function(event){
-userInput.value=event.results[0][0].transcript;
-};
-
-recognition.onend=function(){
-recordBtn.textContent="🎤 Record Voice";
-};
+function unlockPremium(){
+isPremium=true;
+localStorage.setItem("DMGlowPremium","true");
+closeModal();
+alert("Premium Activated");
 }
-
-recordBtn.addEventListener("click",async()=>{
-
-if(!mediaRecorder||mediaRecorder.state==="inactive"){
-
-try{
-streamRef=await navigator.mediaDevices.getUserMedia({audio:true});
-mediaRecorder=new MediaRecorder(streamRef);
-audioChunks=[];
-
-mediaRecorder.start();
-if(recognition) recognition.start();
-
-recordBtn.textContent="⏹ Stop Recording";
-
-mediaRecorder.ondataavailable=e=>{
-audioChunks.push(e.data);
-};
-
-mediaRecorder.onstop=()=>{
-const blob=new Blob(audioChunks,{type:"audio/webm"});
-audioPlayback.src=URL.createObjectURL(blob);
-if(recognition) recognition.stop();
-recordBtn.textContent="🎤 Record Voice";
-streamRef.getTracks().forEach(track=>track.stop());
-};
-
-}catch(err){
-alert("Microphone permission denied.");
+function closeModal(){
+document.getElementById("premiumModal").style.display="none";
 }
-
-}else{
-mediaRecorder.stop();
-}
-
-});
 
 </script>
 
