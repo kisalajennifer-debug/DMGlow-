@@ -28,6 +28,17 @@
 
 <audio id="audioPlayback" controls style="width:100%; margin-top:10px;"></audio>
 
+<div style="display:flex; gap:10px; margin-top:10px;">
+<button id="downloadBtn" class="generate-btn">⬇ Download</button>
+
+<select id="speedControl" class="generate-btn">
+<option value="1">1x Speed</option>
+<option value="1.25">1.25x</option>
+<option value="1.5">1.5x</option>
+<option value="2">2x</option>
+</select>
+</div>
+
 <button class="generate-btn" onclick="generateReply()">Generate Replies</button>
 
 <div class="results" id="outputArea"></div>
@@ -51,7 +62,7 @@ let streamRef = null;
 let recognition = null;
 let isListening = false;
 
-// ================= SMART GENERATOR =================
+// ================= REPLY ENGINE =================
 function generateReply() {
 
 const mood = document.getElementById("tone").value;
@@ -66,38 +77,38 @@ return;
 const variations = {
 chill: [
 `Hmm... "${inputText}"? I like that energy.`,
-`That’s interesting 👀 Tell me more about "${inputText}".`,
+`That’s interesting 👀 Tell me more.`,
 `"${inputText}" sounds like there’s a story there.`,
-`Okay okay… I wasn’t expecting that one.`,
+`Okay okay… wasn’t expecting that.`,
 `Now you’ve got my attention.`
 ],
 playful: [
-`"${inputText}"? Oh we’re being bold today 😌`,
-`Should I be impressed or concerned?`,
+`"${inputText}"? Bold today 😌`,
+`Should I be impressed?`,
 `Look at you starting something.`,
-`You really typed that with confidence huh?`,
+`Confidence looks good on you.`,
 `Dangerous energy detected 😂`
 ],
 confident: [
-`"${inputText}" — I respect direct energy.`,
-`I don’t entertain everything… but this? Not bad.`,
+`"${inputText}" — I respect that.`,
+`Interesting energy.`,
 `Confidence suits you.`,
-`You knew exactly what you were doing there.`,
-`I see intention behind that.`
+`You knew what you were doing.`,
+`I see intention there.`
 ],
 witty: [
-`"${inputText}" just unlocked a plot twist.`,
-`Main character moment right there.`,
+`"${inputText}" unlocked a plot twist.`,
+`Main character moment.`,
 `That line deserves a sequel.`,
-`Unexpected… but entertaining.`,
-`You might be onto something clever.`
+`Unexpected but clever.`,
+`You might be onto something.`
 ],
 mysterious: [
 `"${inputText}"… intriguing.`,
-`You don’t say things like that casually.`,
-`Continue. I’m listening.`,
-`There’s depth behind that message.`,
-`Noted. Very noted.`
+`Continue.`,
+`I’m listening.`,
+`There’s depth there.`,
+`Noted.`
 ]
 };
 
@@ -107,7 +118,6 @@ selectedText = "";
 const shuffled = variations[mood].sort(() => 0.5 - Math.random());
 
 shuffled.slice(0,3).forEach(reply => {
-
 const box = document.createElement("div");
 box.className = "reply-box";
 box.textContent = reply;
@@ -120,7 +130,6 @@ box.style.border = "2px solid white";
 };
 
 outputArea.appendChild(box);
-
 });
 }
 
@@ -149,28 +158,35 @@ if (!selectedText) return alert("Select a reply first.");
 window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText), "_blank");
 }
 
-// ================= VOICE RECORDING + SPEECH =================
+// ================= VOICE =================
 const recordBtn = document.getElementById("recordBtn");
 const audioPlayback = document.getElementById("audioPlayback");
+const downloadBtn = document.getElementById("downloadBtn");
+const speedControl = document.getElementById("speedControl");
 const userInput = document.getElementById("userInput");
 
-// Chrome Speech Recognition
+// Speed control
+speedControl.addEventListener("change", () => {
+audioPlayback.playbackRate = parseFloat(speedControl.value);
+});
+
+// Download audio
+downloadBtn.addEventListener("click", () => {
+if (!audioPlayback.src) return alert("No recording available.");
+const a = document.createElement("a");
+a.href = audioPlayback.src;
+a.download = "DMGlow-recording.webm";
+a.click();
+});
+
+// Speech Recognition (Chrome)
 if ('webkitSpeechRecognition' in window) {
 recognition = new webkitSpeechRecognition();
-recognition.continuous = false;
-recognition.interimResults = false;
 recognition.lang = "en-US";
 
 recognition.onresult = function(event) {
 userInput.value = event.results[0][0].transcript;
-};
-
-recognition.onerror = function() {
-console.log("Speech recognition error.");
-};
-
-recognition.onend = function() {
-if (isListening) recognition.stop();
+generateReply(); // Auto generate after speech
 };
 }
 
@@ -179,7 +195,6 @@ recordBtn.addEventListener("click", async () => {
 if (!mediaRecorder || mediaRecorder.state === "inactive") {
 
 try {
-
 streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
 mediaRecorder = new MediaRecorder(streamRef);
 audioChunks = [];
@@ -187,8 +202,8 @@ audioChunks = [];
 mediaRecorder.start();
 if (recognition) recognition.start();
 
-isListening = true;
 recordBtn.textContent = "⏹ Stop Recording";
+isListening = true;
 
 mediaRecorder.ondataavailable = e => {
 audioChunks.push(e.data);
@@ -199,15 +214,10 @@ mediaRecorder.onstop = () => {
 const blob = new Blob(audioChunks, { type: "audio/webm" });
 audioPlayback.src = URL.createObjectURL(blob);
 
-if (recognition && isListening) recognition.stop();
-
-isListening = false;
 recordBtn.textContent = "🎤 Record Voice";
+isListening = false;
 
-if (streamRef) {
 streamRef.getTracks().forEach(track => track.stop());
-}
-
 };
 
 } catch (err) {
@@ -215,9 +225,8 @@ alert("Microphone permission denied.");
 }
 
 } else {
-
 mediaRecorder.stop();
-
+if (recognition) recognition.stop();
 }
 
 });
