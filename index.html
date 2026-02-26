@@ -1,148 +1,143 @@
-/* ===== GLOBAL RESET ===== */
-* {
-  box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DMGlow Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 
-body {
-  margin: 0;
-  padding: 30px 18px;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #141e30, #1f2a38);
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #f5f5f5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+<body>
 
-/* ===== MAIN CARD ===== */
-.app {
-  width: 100%;
-  max-width: 650px;
-  background: rgba(36, 52, 71, 0.95);
-  padding: 30px;
-  border-radius: 22px;
-  border: 1px solid rgba(201, 162, 39, 0.4);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-}
+  <div class="app">
+    <h1>DMGlow Social Reply Engine</h1>
 
-/* ===== TITLE ===== */
-h1 {
-  text-align: center;
-  color: #C9A227;
-  margin-bottom: 25px;
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: 1px;
-}
+    <textarea id="userInput" placeholder="Paste the message you received..."></textarea>
 
-/* ===== TEXTAREA ===== */
-textarea {
-  width: 100%;
-  height: 130px;
-  background: #2b3c4f;
-  color: white;
-  border: 1px solid rgba(201, 162, 39, 0.5);
-  border-radius: 14px;
-  padding: 15px;
-  font-size: 15px;
-  resize: none;
-  margin-bottom: 18px;
-  transition: 0.2s ease;
-}
+    <div class="controls">
+      <select id="tone">
+        <option value="chill">Chill</option>
+        <option value="playful">Playful</option>
+        <option value="confident">Confident</option>
+        <option value="witty">Witty</option>
+        <option value="mysterious">Mysterious</option>
+      </select>
+    </div>
 
-textarea:focus {
-  outline: none;
-  border-color: #C9A227;
-  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.2);
-}
+    <button class="generate-btn" onclick="generateReply()">
+      Generate Replies
+    </button>
 
-/* ===== SELECT ===== */
-.controls {
-  margin-bottom: 15px;
-}
+    <div class="results" id="outputArea"></div>
 
-select {
-  width: 100%;
-  padding: 12px;
-  background: #2b3c4f;
-  color: white;
-  border: 1px solid rgba(201, 162, 39, 0.5);
-  border-radius: 14px;
-  font-size: 14px;
-  transition: 0.2s ease;
-}
+    <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+      <button class="generate-btn" onclick="nativeShare()">Share (All Apps)</button>
+      <button class="generate-btn" onclick="shareWhatsApp()">Send to WhatsApp</button>
+      <button class="generate-btn" onclick="shareFacebook()">Share to Facebook</button>
+      <button class="generate-btn" onclick="shareLinkedIn()">Share to LinkedIn</button>
+    </div>
 
-select:focus {
-  outline: none;
-  border-color: #C9A227;
-}
+  </div>
 
-/* ===== BUTTONS ===== */
-.generate-btn {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #C9A227, #e6c35c);
-  color: #1F2A38;
-  font-weight: 700;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  margin-top: 10px;
-  letter-spacing: 0.5px;
-}
+  <script>
+    let selectedText = "";
 
-.generate-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(201, 162, 39, 0.4);
-}
+    function generateReply() {
+      const mood = document.getElementById("tone").value;
+      const outputArea = document.getElementById("outputArea");
+      const inputText = document.getElementById("userInput").value;
 
-.generate-btn:active {
-  transform: scale(0.98);
-}
+      if (!inputText) {
+        alert("Please enter a message first.");
+        return;
+      }
 
-/* ===== RESULTS AREA ===== */
-.results {
-  margin-top: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+      const replies = {
+        chill: [
+          `Haha I see you 👀 but what made you say "${inputText}"?`,
+          `Okay now I'm curious… explain "${inputText}" a little more.`,
+          `Wait wait 😂 "${inputText}" has a story behind it.`
+        ],
+        playful: [
+          `"${inputText}"? Bold of you 😌`,
+          `Oh so we're starting like that? Interesting.`,
+          `You woke up and chose confidence today huh?`
+        ],
+        confident: [
+          `I don’t usually entertain messages like "${inputText}"… but I’ll allow it.`,
+          `Interesting energy. I respect it.`,
+          `You’re either brave… or very sure of yourself.`
+        ],
+        witty: [
+          `"${inputText}" had main character energy.`,
+          `Plot twist… I actually liked that.`,
+          `You're testing the waters with that one 😂`
+        ],
+        mysterious: [
+          `"${inputText}"… intriguing.`,
+          `You might be onto something.`,
+          `Continue. I’m listening.`
+        ]
+      };
 
-/* ===== REPLY BOX ===== */
-.reply-box {
-  background: #2b3c4f;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(201, 162, 39, 0.4);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+      outputArea.innerHTML = "";
+      selectedText = "";
 
-.reply-box:hover {
-  background: #344a63;
-  transform: translateY(-2px);
-}
+      const selectedReplies = replies[mood];
 
-.reply-box p {
-  margin: 0;
-  line-height: 1.6;
-  font-size: 14.5px;
-}
+      selectedReplies.forEach(reply => {
+        const box = document.createElement("div");
+        box.className = "reply-box";
 
-/* ===== MOBILE OPTIMIZATION ===== */
-@media (max-width: 480px) {
-  body {
-    padding: 20px 12px;
-  }
+        const p = document.createElement("p");
+        p.textContent = reply;
 
-  .app {
-    padding: 22px;
-  }
+        box.appendChild(p);
 
-  h1 {
-    font-size: 18px;
-  }
-}
+        box.onclick = function() {
+          selectedText = reply;
+          document.querySelectorAll(".reply-box")
+            .forEach(b => b.style.border = "1px solid #C9A227");
+          box.style.border = "2px solid white";
+        };
+
+        outputArea.appendChild(box);
+      });
+    }
+
+    function nativeShare() {
+      if (!selectedText) {
+        alert("Select a reply first.");
+        return;
+      }
+
+      if (navigator.share) {
+        navigator.share({
+          title: "DMGlow Reply",
+          text: selectedText
+        });
+      } else {
+        alert("Sharing not supported on this device.");
+      }
+    }
+
+    function shareWhatsApp() {
+      if (!selectedText) return alert("Select a reply first.");
+      const url = "https://wa.me/?text=" + encodeURIComponent(selectedText);
+      window.open(url, "_blank");
+    }
+
+    function shareFacebook() {
+      if (!selectedText) return alert("Select a reply first.");
+      const url = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(selectedText);
+      window.open(url, "_blank");
+    }
+
+    function shareLinkedIn() {
+      if (!selectedText) return alert("Select a reply first.");
+      const url = "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText);
+      window.open(url, "_blank");
+    }
+
+  </script>
+
+</body>
+</html>
