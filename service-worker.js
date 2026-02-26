@@ -1,21 +1,43 @@
-self.addEventListener("install", event => {
+const CACHE_NAME = "dmglow-v1";
+
+const FILES_TO_CACHE = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./manifest.json"
+];
+
+// Install
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open("dmglow-cache").then(cache => {
-      return cache.addAll([
-        "./",
-        "./index.html",
-        "./style.css"
-      ]);
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(FILES_TO_CACHE))
   );
+  self.skipWaiting();
 });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+// Activate
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keyList) => {
+      return Promise.all(
+        keyList.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
     })
   );
-});if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js');
-}
+  self.clients.claim();
+});
+
+// Fetch
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        return response || fetch(event.request);
+      })
+  );
+});
