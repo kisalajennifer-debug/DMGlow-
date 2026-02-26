@@ -136,4 +136,28 @@ audio {
   border: 1px solid #C9A227;
   max-width: 400px;
   text-align: center;
+}/* ================= PREMIUM ANIMATIONS ================= */
+
+/* Smooth fade-in for replies */
+.reply-box {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s ease;
+}
+
+.reply-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Gold pulse when selected */
+.reply-box.selected {
+  border: 2px solid #C9A227 !important;
+  animation: goldPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes goldPulse {
+  0% { box-shadow: 0 0 0px rgba(201,162,39,0.4); }
+  50% { box-shadow: 0 0 12px rgba(201,162,39,0.8); }
+  100% { box-shadow: 0 0 0px rgba(201,162,39,0.4); }
 }
