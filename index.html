@@ -3,17 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMGlow Social Reply Engine</title>
+<title>DMGlow Emotional Intelligence Engine</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
-.analysis-box {
-  margin-top: 15px;
-  padding: 12px;
-  border: 1px solid #C9A227;
-  border-radius: 12px;
-  font-size: 14px;
-  background: rgba(201,162,39,0.08);
+.analysis-box{
+  margin-top:15px;
+  padding:12px;
+  border:1px solid #C9A227;
+  border-radius:12px;
+  font-size:14px;
+  background:rgba(201,162,39,0.08);
+}
+.mode-label{
+  font-size:13px;
+  opacity:0.8;
+  margin-top:5px;
 }
 </style>
 
@@ -22,15 +27,17 @@
 <body>
 
 <div class="app">
-<h1>DMGlow Social Reply Engine</h1>
+<h1>DMGlow Emotional Intelligence Engine</h1>
 
 <textarea id="userInput" placeholder="Paste the message you received or record voice..."></textarea>
 
 <div class="controls">
-<select id="tone">
+<select id="mode">
 <option value="magnetic">Magnetic Authority</option>
 <option value="strategic">Strategic High Value</option>
 <option value="balanced">Power Balanced</option>
+<option value="dating">Dating Psychology</option>
+<option value="business">Corporate / Business</option>
 </select>
 
 <button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
@@ -40,7 +47,7 @@
 
 <audio id="audioPlayback" controls style="width:100%; margin-top:10px;"></audio>
 
-<button class="generate-btn" onclick="generateReply()">Generate Replies</button>
+<button class="generate-btn" onclick="generateReply()">Generate Intelligent Replies</button>
 
 <div class="results" id="outputArea"></div>
 
@@ -49,107 +56,132 @@
 <script>
 
 // ================= GLOBAL =================
-let selectedText = "";
-let mediaRecorder = null;
-let audioChunks = [];
-let streamRef = null;
-let recognition = null;
+let selectedText="";
+let usedReplies=new Set();
+let mediaRecorder=null;
+let audioChunks=[];
+let streamRef=null;
+let recognition=null;
 
-// ================= EMOTION DETECTION =================
-function detectEmotion(text) {
-  text = text.toLowerCase();
+// ================= MULTI-EMOTION DETECTION =================
+function detectEmotion(text){
+text=text.toLowerCase();
 
-  if (/(love|miss|happy|excited|proud|beautiful|amazing)/.test(text)) {
-    return { label: "Positive Energy ❤️", type: "positive" };
-  }
+let score={
+positive:0,
+vulnerable:0,
+heated:0,
+neutral:0
+};
 
-  if (/(sorry|confused|tired|hurt|sad|alone|disappointed|unsure)/.test(text)) {
-    return { label: "Vulnerable Energy 🧡", type: "vulnerable" };
-  }
+if(/love|happy|excited|amazing|beautiful|miss/.test(text)) score.positive++;
+if(/sorry|confused|tired|hurt|sad|alone|disappointed/.test(text)) score.vulnerable++;
+if(/hate|angry|annoyed|frustrated|upset/.test(text)) score.heated++;
 
-  if (/(hate|angry|annoyed|frustrated|upset|irritated)/.test(text)) {
-    return { label: "Heated Energy 🔥", type: "heated" };
-  }
+if(score.positive===0 && score.vulnerable===0 && score.heated===0){
+score.neutral++;
+}
 
-  return { label: "Neutral / Testing Energy 🤍", type: "neutral" };
+let primary=Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
+
+return primary;
+}
+
+// ================= REPLY POOLS =================
+const replyBank={
+
+positive:[
+"Confidence like that should be intentional.",
+"Energy attracts alignment, not randomness.",
+"You speak with certainty — I respect that."
+],
+
+vulnerable:[
+"Not everything needs immediate resolution.",
+"Strength also exists in reflection.",
+"Some clarity only comes after pause."
+],
+
+heated:[
+"I prefer precision over reaction.",
+"Intensity rarely builds outcomes.",
+"Let’s recalibrate before we escalate."
+],
+
+neutral:[
+"There’s depth behind that.",
+"I’m observing before responding.",
+"Continue — I’m assessing."
+]
+};
+
+// ================= MODE MODIFIERS =================
+function applyMode(reply,mode){
+
+if(mode==="strategic")
+return reply+" Timing defines leverage.";
+
+if(mode==="balanced")
+return reply+" Power doesn’t compete.";
+
+if(mode==="dating")
+return reply+" Attraction grows in emotional control.";
+
+if(mode==="business")
+return reply+" Execution matters more than emotion.";
+
+return reply;
 }
 
 // ================= GENERATOR =================
-function generateReply() {
+function generateReply(){
 
-const inputText = document.getElementById("userInput").value.trim();
-const tone = document.getElementById("tone").value;
-const outputArea = document.getElementById("outputArea");
-const analysisBox = document.getElementById("analysisBox");
+const inputText=document.getElementById("userInput").value.trim();
+const mode=document.getElementById("mode").value;
+const outputArea=document.getElementById("outputArea");
+const analysisBox=document.getElementById("analysisBox");
 
-if (!inputText) {
-alert("Please enter or record a message first.");
+if(!inputText){
+alert("Enter or record a message first.");
 return;
 }
 
-const emotion = detectEmotion(inputText);
+const emotion=detectEmotion(inputText);
 
-analysisBox.innerHTML = `
-<strong>Detected Energy:</strong> ${emotion.label}<br>
-<strong>Response Mode:</strong> ${tone}
+analysisBox.innerHTML=`
+<strong>Detected Emotional Core:</strong> ${emotion.toUpperCase()}<br>
+<strong>Mode:</strong> ${mode}
 `;
 
-let responses = [];
+outputArea.innerHTML="";
+selectedText="";
 
-if (emotion.type === "positive") {
-responses = [
-"Confidence suits someone who speaks like that.",
-"Energy like this deserves intention, not impulse.",
-"You don’t say things without meaning them."
-];
+let pool=[...replyBank[emotion]];
+
+// remove already used replies for uniqueness
+pool=pool.filter(r=>!usedReplies.has(r));
+
+if(pool.length===0){
+usedReplies.clear();
+pool=[...replyBank[emotion]];
 }
 
-if (emotion.type === "vulnerable") {
-responses = [
-"Some exhaustion comes from carrying more than you should.",
-"Rest isn’t weakness. It’s recalibration.",
-"You don’t have to solve everything at once."
-];
-}
+pool.sort(()=>0.5-Math.random());
 
-if (emotion.type === "heated") {
-responses = [
-"Strong reactions usually hide something deeper.",
-"I prefer clarity over intensity.",
-"Let’s slow this down before it escalates."
-];
-}
+pool.slice(0,3).forEach(reply=>{
 
-if (emotion.type === "neutral") {
-responses = [
-"I’m listening. Continue.",
-"Interesting choice of words.",
-"There’s more behind that, isn’t there?"
-];
-}
+const modified=applyMode(reply,mode);
+usedReplies.add(reply);
 
-if (tone === "strategic") {
-responses = responses.map(r => r + " Precision changes outcomes.");
-}
+const box=document.createElement("div");
+box.className="reply-box";
+box.textContent=modified;
 
-if (tone === "balanced") {
-responses = responses.map(r => r + " Strength doesn’t require noise.");
-}
-
-outputArea.innerHTML = "";
-selectedText = "";
-
-responses.sort(() => 0.5 - Math.random()).slice(0,3).forEach(reply => {
-
-const box = document.createElement("div");
-box.className = "reply-box";
-box.textContent = reply;
-
-box.onclick = function() {
-selectedText = reply;
+box.onclick=function(){
+selectedText=modified;
 document.querySelectorAll(".reply-box")
-.forEach(b => b.style.border = "1px solid #C9A227");
-box.style.border = "2px solid white";
+.forEach(b=>b.style.border="1px solid #C9A227");
+box.style.border="2px solid white";
 };
 
 outputArea.appendChild(box);
@@ -157,58 +189,57 @@ outputArea.appendChild(box);
 });
 }
 
-// ================= VOICE RECORDING =================
-const recordBtn = document.getElementById("recordBtn");
-const audioPlayback = document.getElementById("audioPlayback");
-const userInput = document.getElementById("userInput");
+// ================= VOICE RECORDING + STT =================
+const recordBtn=document.getElementById("recordBtn");
+const audioPlayback=document.getElementById("audioPlayback");
+const userInput=document.getElementById("userInput");
 
-if ('webkitSpeechRecognition' in window) {
-recognition = new webkitSpeechRecognition();
-recognition.continuous = false;
-recognition.interimResults = false;
-recognition.lang = "en-US";
+if('webkitSpeechRecognition' in window){
+recognition=new webkitSpeechRecognition();
+recognition.continuous=false;
+recognition.interimResults=false;
+recognition.lang="en-US";
 
-recognition.onresult = function(event) {
-userInput.value = event.results[0][0].transcript;
+recognition.onresult=function(event){
+userInput.value=event.results[0][0].transcript;
 };
 
-recognition.onend = function() {
-recordBtn.textContent = "🎤 Record Voice";
+recognition.onend=function(){
+recordBtn.textContent="🎤 Record Voice";
 };
 }
 
-recordBtn.addEventListener("click", async () => {
+recordBtn.addEventListener("click",async()=>{
 
-if (!mediaRecorder || mediaRecorder.state === "inactive") {
+if(!mediaRecorder||mediaRecorder.state==="inactive"){
 
-try {
-streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
-mediaRecorder = new MediaRecorder(streamRef);
-audioChunks = [];
+try{
+streamRef=await navigator.mediaDevices.getUserMedia({audio:true});
+mediaRecorder=new MediaRecorder(streamRef);
+audioChunks=[];
 
 mediaRecorder.start();
-if (recognition) recognition.start();
+if(recognition) recognition.start();
 
-recordBtn.textContent = "⏹ Stop Recording";
+recordBtn.textContent="⏹ Stop Recording";
 
-mediaRecorder.ondataavailable = e => {
+mediaRecorder.ondataavailable=e=>{
 audioChunks.push(e.data);
 };
 
-mediaRecorder.onstop = () => {
-const blob = new Blob(audioChunks, { type: "audio/webm" });
-const audioURL = URL.createObjectURL(blob);
-audioPlayback.src = audioURL;
-if (recognition) recognition.stop();
-recordBtn.textContent = "🎤 Record Voice";
-streamRef.getTracks().forEach(track => track.stop());
+mediaRecorder.onstop=()=>{
+const blob=new Blob(audioChunks,{type:"audio/webm"});
+audioPlayback.src=URL.createObjectURL(blob);
+if(recognition) recognition.stop();
+recordBtn.textContent="🎤 Record Voice";
+streamRef.getTracks().forEach(track=>track.stop());
 };
 
-} catch (err) {
+}catch(err){
 alert("Microphone permission denied.");
 }
 
-} else {
+}else{
 mediaRecorder.stop();
 }
 
