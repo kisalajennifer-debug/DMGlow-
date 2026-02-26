@@ -154,7 +154,7 @@ const recordBtn = document.getElementById("recordBtn");
 const audioPlayback = document.getElementById("audioPlayback");
 const userInput = document.getElementById("userInput");
 
-// Setup Speech Recognition (Chrome only)
+// Chrome Speech Recognition
 if ('webkitSpeechRecognition' in window) {
 recognition = new webkitSpeechRecognition();
 recognition.continuous = false;
@@ -165,9 +165,12 @@ recognition.onresult = function(event) {
 userInput.value = event.results[0][0].transcript;
 };
 
+recognition.onerror = function() {
+console.log("Speech recognition error.");
+};
+
 recognition.onend = function() {
-isListening = false;
-recordBtn.textContent = "🎤 Record Voice";
+if (isListening) recognition.stop();
 };
 }
 
@@ -176,6 +179,7 @@ recordBtn.addEventListener("click", async () => {
 if (!mediaRecorder || mediaRecorder.state === "inactive") {
 
 try {
+
 streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
 mediaRecorder = new MediaRecorder(streamRef);
 audioChunks = [];
@@ -183,8 +187,8 @@ audioChunks = [];
 mediaRecorder.start();
 if (recognition) recognition.start();
 
-recordBtn.textContent = "⏹ Stop Recording";
 isListening = true;
+recordBtn.textContent = "⏹ Stop Recording";
 
 mediaRecorder.ondataavailable = e => {
 audioChunks.push(e.data);
@@ -193,13 +197,17 @@ audioChunks.push(e.data);
 mediaRecorder.onstop = () => {
 
 const blob = new Blob(audioChunks, { type: "audio/webm" });
-const audioURL = URL.createObjectURL(blob);
-audioPlayback.src = audioURL;
+audioPlayback.src = URL.createObjectURL(blob);
 
 if (recognition && isListening) recognition.stop();
 
+isListening = false;
 recordBtn.textContent = "🎤 Record Voice";
+
+if (streamRef) {
 streamRef.getTracks().forEach(track => track.stop());
+}
+
 };
 
 } catch (err) {
@@ -207,7 +215,9 @@ alert("Microphone permission denied.");
 }
 
 } else {
+
 mediaRecorder.stop();
+
 }
 
 });
