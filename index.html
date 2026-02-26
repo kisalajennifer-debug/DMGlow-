@@ -1,154 +1,215 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMGlow Social Reply Engine</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMGlow Social Reply Engine</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="app">
-  <h1>DMGlow Social Reply Engine</h1>
+<h1>DMGlow Social Reply Engine</h1>
 
-  <textarea id="userInput" placeholder="Paste the message you received or record voice..."></textarea>
+<textarea id="userInput" placeholder="Paste the message you received or record voice..."></textarea>
 
-  <div class="controls">
-    <select id="tone">
-      <option value="chill">Chill</option>
-      <option value="playful">Playful</option>
-      <option value="confident">Confident</option>
-      <option value="witty">Witty</option>
-      <option value="mysterious">Mysterious</option>
-    </select>
+<div class="controls">
+<select id="tone">
+<option value="chill">Chill</option>
+<option value="playful">Playful</option>
+<option value="confident">Confident</option>
+<option value="witty">Witty</option>
+<option value="mysterious">Mysterious</option>
+</select>
 
-    <button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
-  </div>
+<button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
+</div>
 
-  <button class="generate-btn" onclick="generateReply()">
-    Generate Replies
-  </button>
+<audio id="audioPlayback" controls style="width:100%; margin-top:10px;"></audio>
 
-  <div class="results" id="outputArea"></div>
+<button class="generate-btn" onclick="generateReply()">Generate Replies</button>
+
+<div class="results" id="outputArea"></div>
+
+<div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+<button class="generate-btn" onclick="nativeShare()">Share (All Apps)</button>
+<button class="generate-btn" onclick="shareWhatsApp()">Send to WhatsApp</button>
+<button class="generate-btn" onclick="shareFacebook()">Share to Facebook</button>
+<button class="generate-btn" onclick="shareLinkedIn()">Share to LinkedIn</button>
+</div>
 
 </div>
 
 <script>
 
-// ================= SMART GENERATOR =================
+// ================= GLOBAL =================
 let selectedText = "";
+let mediaRecorder = null;
+let audioChunks = [];
+let streamRef = null;
+let recognition = null;
+let isListening = false;
 
+// ================= SMART GENERATOR =================
 function generateReply() {
-  const mood = document.getElementById("tone").value;
-  const outputArea = document.getElementById("outputArea");
-  const inputText = document.getElementById("userInput").value.trim();
 
-  if (!inputText) {
-    alert("Please enter or record a message first.");
-    return;
-  }
+const mood = document.getElementById("tone").value;
+const outputArea = document.getElementById("outputArea");
+const inputText = document.getElementById("userInput").value.trim();
 
-  const variations = {
-    chill: [
-      `Hmm... "${inputText}"? I like that energy.`,
-      `That’s interesting 👀 Tell me more about "${inputText}".`,
-      `"${inputText}" sounds like there’s a story there.`,
-      `Okay okay… I wasn’t expecting that one.`,
-      `Now you’ve got my attention.`
-    ],
-    playful: [
-      `"${inputText}"? Oh we’re being bold today 😌`,
-      `Should I be impressed or concerned?`,
-      `Look at you starting something.`,
-      `You really typed that with confidence huh?`,
-      `Dangerous energy detected 😂`
-    ],
-    confident: [
-      `"${inputText}" — I respect direct energy.`,
-      `I don’t entertain everything… but this? Not bad.`,
-      `Confidence suits you.`,
-      `You knew exactly what you were doing there.`,
-      `I see intention behind that.`
-    ],
-    witty: [
-      `"${inputText}" just unlocked a plot twist.`,
-      `Main character moment right there.`,
-      `That line deserves a sequel.`,
-      `Unexpected… but entertaining.`,
-      `You might be onto something clever.`
-    ],
-    mysterious: [
-      `"${inputText}"… intriguing.`,
-      `You don’t say things like that casually.`,
-      `Continue. I’m listening.`,
-      `There’s depth behind that message.`,
-      `Noted. Very noted.`
-    ]
-  };
-
-  outputArea.innerHTML = "";
-  selectedText = "";
-
-  const shuffled = variations[mood].sort(() => 0.5 - Math.random());
-
-  shuffled.slice(0, 3).forEach(reply => {
-    const box = document.createElement("div");
-    box.className = "reply-box";
-    box.textContent = reply;
-
-    box.onclick = function() {
-      selectedText = reply;
-      document.querySelectorAll(".reply-box")
-        .forEach(b => b.style.border = "1px solid #C9A227");
-      box.style.border = "2px solid white";
-    };
-
-    outputArea.appendChild(box);
-  });
+if (!inputText) {
+alert("Please enter or record a message first.");
+return;
 }
 
+const variations = {
+chill: [
+`Hmm... "${inputText}"? I like that energy.`,
+`That’s interesting 👀 Tell me more about "${inputText}".`,
+`"${inputText}" sounds like there’s a story there.`,
+`Okay okay… I wasn’t expecting that one.`,
+`Now you’ve got my attention.`
+],
+playful: [
+`"${inputText}"? Oh we’re being bold today 😌`,
+`Should I be impressed or concerned?`,
+`Look at you starting something.`,
+`You really typed that with confidence huh?`,
+`Dangerous energy detected 😂`
+],
+confident: [
+`"${inputText}" — I respect direct energy.`,
+`I don’t entertain everything… but this? Not bad.`,
+`Confidence suits you.`,
+`You knew exactly what you were doing there.`,
+`I see intention behind that.`
+],
+witty: [
+`"${inputText}" just unlocked a plot twist.`,
+`Main character moment right there.`,
+`That line deserves a sequel.`,
+`Unexpected… but entertaining.`,
+`You might be onto something clever.`
+],
+mysterious: [
+`"${inputText}"… intriguing.`,
+`You don’t say things like that casually.`,
+`Continue. I’m listening.`,
+`There’s depth behind that message.`,
+`Noted. Very noted.`
+]
+};
 
-// ================= SPEECH TO TEXT =================
+outputArea.innerHTML = "";
+selectedText = "";
+
+const shuffled = variations[mood].sort(() => 0.5 - Math.random());
+
+shuffled.slice(0,3).forEach(reply => {
+
+const box = document.createElement("div");
+box.className = "reply-box";
+box.textContent = reply;
+
+box.onclick = function() {
+selectedText = reply;
+document.querySelectorAll(".reply-box")
+.forEach(b => b.style.border = "1px solid #C9A227");
+box.style.border = "2px solid white";
+};
+
+outputArea.appendChild(box);
+
+});
+}
+
+// ================= SHARE =================
+function nativeShare() {
+if (!selectedText) return alert("Select a reply first.");
+if (navigator.share) {
+navigator.share({ title: "DMGlow Reply", text: selectedText });
+} else {
+alert("Sharing not supported.");
+}
+}
+
+function shareWhatsApp() {
+if (!selectedText) return alert("Select a reply first.");
+window.open("https://wa.me/?text=" + encodeURIComponent(selectedText), "_blank");
+}
+
+function shareFacebook() {
+if (!selectedText) return alert("Select a reply first.");
+window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(selectedText), "_blank");
+}
+
+function shareLinkedIn() {
+if (!selectedText) return alert("Select a reply first.");
+window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText), "_blank");
+}
+
+// ================= VOICE RECORDING + SPEECH =================
 const recordBtn = document.getElementById("recordBtn");
+const audioPlayback = document.getElementById("audioPlayback");
 const userInput = document.getElementById("userInput");
 
-let recognition;
-let isRecording = false;
-
-// Check browser support
+// Setup Speech Recognition (Chrome only)
 if ('webkitSpeechRecognition' in window) {
-  recognition = new webkitSpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = "en-US";
+recognition = new webkitSpeechRecognition();
+recognition.continuous = false;
+recognition.interimResults = false;
+recognition.lang = "en-US";
 
-  recognition.onresult = function(event) {
-    const transcript = event.results[0][0].transcript;
-    userInput.value = transcript;
-  };
+recognition.onresult = function(event) {
+userInput.value = event.results[0][0].transcript;
+};
 
-  recognition.onend = function() {
-    recordBtn.textContent = "🎤 Record Voice";
-    isRecording = false;
-  };
-
-} else {
-  alert("Speech recognition not supported in this browser. Use Chrome.");
+recognition.onend = function() {
+isListening = false;
+recordBtn.textContent = "🎤 Record Voice";
+};
 }
 
-recordBtn.addEventListener("click", function() {
-  if (!recognition) return;
+recordBtn.addEventListener("click", async () => {
 
-  if (!isRecording) {
-    recognition.start();
-    recordBtn.textContent = "⏹ Listening...";
-    isRecording = true;
-  } else {
-    recognition.stop();
-    recordBtn.textContent = "🎤 Record Voice";
-    isRecording = false;
-  }
+if (!mediaRecorder || mediaRecorder.state === "inactive") {
+
+try {
+streamRef = await navigator.mediaDevices.getUserMedia({ audio: true });
+mediaRecorder = new MediaRecorder(streamRef);
+audioChunks = [];
+
+mediaRecorder.start();
+if (recognition) recognition.start();
+
+recordBtn.textContent = "⏹ Stop Recording";
+isListening = true;
+
+mediaRecorder.ondataavailable = e => {
+audioChunks.push(e.data);
+};
+
+mediaRecorder.onstop = () => {
+
+const blob = new Blob(audioChunks, { type: "audio/webm" });
+const audioURL = URL.createObjectURL(blob);
+audioPlayback.src = audioURL;
+
+if (recognition && isListening) recognition.stop();
+
+recordBtn.textContent = "🎤 Record Voice";
+streamRef.getTracks().forEach(track => track.stop());
+};
+
+} catch (err) {
+alert("Microphone permission denied.");
+}
+
+} else {
+mediaRecorder.stop();
+}
+
 });
 
 </script>
