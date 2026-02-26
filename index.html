@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DMGlow Social Reply Engine</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+.analysis-box {
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid #C9A227;
+  border-radius: 12px;
+  font-size: 14px;
+  background: rgba(201,162,39,0.08);
+}
+</style>
+
 </head>
 
 <body>
@@ -16,39 +28,21 @@
 
 <div class="controls">
 <select id="tone">
-<option value="chill">Chill</option>
-<option value="playful">Playful</option>
-<option value="confident">Confident</option>
-<option value="witty">Witty</option>
-<option value="mysterious">Mysterious</option>
+<option value="magnetic">Magnetic Authority</option>
+<option value="strategic">Strategic High Value</option>
+<option value="balanced">Power Balanced</option>
 </select>
 
 <button id="recordBtn" class="generate-btn">🎤 Record Voice</button>
 </div>
 
+<div id="analysisBox" class="analysis-box"></div>
+
 <audio id="audioPlayback" controls style="width:100%; margin-top:10px;"></audio>
-
-<div style="display:flex; gap:10px; margin-top:10px;">
-<button id="downloadBtn" class="generate-btn">⬇ Download</button>
-
-<select id="speedControl" class="generate-btn">
-<option value="1">1x Speed</option>
-<option value="1.25">1.25x</option>
-<option value="1.5">1.5x</option>
-<option value="2">2x</option>
-</select>
-</div>
 
 <button class="generate-btn" onclick="generateReply()">Generate Replies</button>
 
 <div class="results" id="outputArea"></div>
-
-<div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-<button class="generate-btn" onclick="nativeShare()">Share (All Apps)</button>
-<button class="generate-btn" onclick="shareWhatsApp()">Send to WhatsApp</button>
-<button class="generate-btn" onclick="shareFacebook()">Share to Facebook</button>
-<button class="generate-btn" onclick="shareLinkedIn()">Share to LinkedIn</button>
-</div>
 
 </div>
 
@@ -60,64 +54,93 @@ let mediaRecorder = null;
 let audioChunks = [];
 let streamRef = null;
 let recognition = null;
-let isListening = false;
 
-// ================= REPLY ENGINE =================
+// ================= EMOTION DETECTION =================
+function detectEmotion(text) {
+  text = text.toLowerCase();
+
+  if (/(love|miss|happy|excited|proud|beautiful|amazing)/.test(text)) {
+    return { label: "Positive Energy ❤️", type: "positive" };
+  }
+
+  if (/(sorry|confused|tired|hurt|sad|alone|disappointed|unsure)/.test(text)) {
+    return { label: "Vulnerable Energy 🧡", type: "vulnerable" };
+  }
+
+  if (/(hate|angry|annoyed|frustrated|upset|irritated)/.test(text)) {
+    return { label: "Heated Energy 🔥", type: "heated" };
+  }
+
+  return { label: "Neutral / Testing Energy 🤍", type: "neutral" };
+}
+
+// ================= GENERATOR =================
 function generateReply() {
 
-const mood = document.getElementById("tone").value;
-const outputArea = document.getElementById("outputArea");
 const inputText = document.getElementById("userInput").value.trim();
+const tone = document.getElementById("tone").value;
+const outputArea = document.getElementById("outputArea");
+const analysisBox = document.getElementById("analysisBox");
 
 if (!inputText) {
 alert("Please enter or record a message first.");
 return;
 }
 
-const variations = {
-chill: [
-`Hmm... "${inputText}"? I like that energy.`,
-`That’s interesting 👀 Tell me more.`,
-`"${inputText}" sounds like there’s a story there.`,
-`Okay okay… wasn’t expecting that.`,
-`Now you’ve got my attention.`
-],
-playful: [
-`"${inputText}"? Bold today 😌`,
-`Should I be impressed?`,
-`Look at you starting something.`,
-`Confidence looks good on you.`,
-`Dangerous energy detected 😂`
-],
-confident: [
-`"${inputText}" — I respect that.`,
-`Interesting energy.`,
-`Confidence suits you.`,
-`You knew what you were doing.`,
-`I see intention there.`
-],
-witty: [
-`"${inputText}" unlocked a plot twist.`,
-`Main character moment.`,
-`That line deserves a sequel.`,
-`Unexpected but clever.`,
-`You might be onto something.`
-],
-mysterious: [
-`"${inputText}"… intriguing.`,
-`Continue.`,
-`I’m listening.`,
-`There’s depth there.`,
-`Noted.`
-]
-};
+const emotion = detectEmotion(inputText);
+
+analysisBox.innerHTML = `
+<strong>Detected Energy:</strong> ${emotion.label}<br>
+<strong>Response Mode:</strong> ${tone}
+`;
+
+let responses = [];
+
+if (emotion.type === "positive") {
+responses = [
+"Confidence suits someone who speaks like that.",
+"Energy like this deserves intention, not impulse.",
+"You don’t say things without meaning them."
+];
+}
+
+if (emotion.type === "vulnerable") {
+responses = [
+"Some exhaustion comes from carrying more than you should.",
+"Rest isn’t weakness. It’s recalibration.",
+"You don’t have to solve everything at once."
+];
+}
+
+if (emotion.type === "heated") {
+responses = [
+"Strong reactions usually hide something deeper.",
+"I prefer clarity over intensity.",
+"Let’s slow this down before it escalates."
+];
+}
+
+if (emotion.type === "neutral") {
+responses = [
+"I’m listening. Continue.",
+"Interesting choice of words.",
+"There’s more behind that, isn’t there?"
+];
+}
+
+if (tone === "strategic") {
+responses = responses.map(r => r + " Precision changes outcomes.");
+}
+
+if (tone === "balanced") {
+responses = responses.map(r => r + " Strength doesn’t require noise.");
+}
 
 outputArea.innerHTML = "";
 selectedText = "";
 
-const shuffled = variations[mood].sort(() => 0.5 - Math.random());
+responses.sort(() => 0.5 - Math.random()).slice(0,3).forEach(reply => {
 
-shuffled.slice(0,3).forEach(reply => {
 const box = document.createElement("div");
 box.className = "reply-box";
 box.textContent = reply;
@@ -130,63 +153,27 @@ box.style.border = "2px solid white";
 };
 
 outputArea.appendChild(box);
+
 });
 }
 
-// ================= SHARE =================
-function nativeShare() {
-if (!selectedText) return alert("Select a reply first.");
-if (navigator.share) {
-navigator.share({ title: "DMGlow Reply", text: selectedText });
-} else {
-alert("Sharing not supported.");
-}
-}
-
-function shareWhatsApp() {
-if (!selectedText) return alert("Select a reply first.");
-window.open("https://wa.me/?text=" + encodeURIComponent(selectedText), "_blank");
-}
-
-function shareFacebook() {
-if (!selectedText) return alert("Select a reply first.");
-window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(selectedText), "_blank");
-}
-
-function shareLinkedIn() {
-if (!selectedText) return alert("Select a reply first.");
-window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(selectedText), "_blank");
-}
-
-// ================= VOICE =================
+// ================= VOICE RECORDING =================
 const recordBtn = document.getElementById("recordBtn");
 const audioPlayback = document.getElementById("audioPlayback");
-const downloadBtn = document.getElementById("downloadBtn");
-const speedControl = document.getElementById("speedControl");
 const userInput = document.getElementById("userInput");
 
-// Speed control
-speedControl.addEventListener("change", () => {
-audioPlayback.playbackRate = parseFloat(speedControl.value);
-});
-
-// Download audio
-downloadBtn.addEventListener("click", () => {
-if (!audioPlayback.src) return alert("No recording available.");
-const a = document.createElement("a");
-a.href = audioPlayback.src;
-a.download = "DMGlow-recording.webm";
-a.click();
-});
-
-// Speech Recognition (Chrome)
 if ('webkitSpeechRecognition' in window) {
 recognition = new webkitSpeechRecognition();
+recognition.continuous = false;
+recognition.interimResults = false;
 recognition.lang = "en-US";
 
 recognition.onresult = function(event) {
 userInput.value = event.results[0][0].transcript;
-generateReply(); // Auto generate after speech
+};
+
+recognition.onend = function() {
+recordBtn.textContent = "🎤 Record Voice";
 };
 }
 
@@ -203,20 +190,17 @@ mediaRecorder.start();
 if (recognition) recognition.start();
 
 recordBtn.textContent = "⏹ Stop Recording";
-isListening = true;
 
 mediaRecorder.ondataavailable = e => {
 audioChunks.push(e.data);
 };
 
 mediaRecorder.onstop = () => {
-
 const blob = new Blob(audioChunks, { type: "audio/webm" });
-audioPlayback.src = URL.createObjectURL(blob);
-
+const audioURL = URL.createObjectURL(blob);
+audioPlayback.src = audioURL;
+if (recognition) recognition.stop();
 recordBtn.textContent = "🎤 Record Voice";
-isListening = false;
-
 streamRef.getTracks().forEach(track => track.stop());
 };
 
@@ -226,7 +210,6 @@ alert("Microphone permission denied.");
 
 } else {
 mediaRecorder.stop();
-if (recognition) recognition.stop();
 }
 
 });
