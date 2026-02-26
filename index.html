@@ -23,7 +23,21 @@
 </style>
 
 </head>
-
+<div id="premiumModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center;">
+  <div style="background:#243447; padding:30px; border-radius:16px; max-width:400px; text-align:center; border:1px solid #C9A227;">
+    <h2 style="color:#C9A227;">Upgrade to DMGlow Premium</h2>
+    <p style="margin-top:10px;">
+      Unlock full emotional intelligence modes, unlimited intelligent replies,
+      and priority AI authority shaping.
+    </p>
+    <button onclick="unlockPremium()" class="generate-btn" style="margin-top:15px;">
+      Upgrade Now
+    </button>
+    <button onclick="closeModal()" style="margin-top:10px; background:none; color:white; border:none;">
+      Maybe Later
+    </button>
+  </div>
+</div>
 <body>
 
 <div class="app">
