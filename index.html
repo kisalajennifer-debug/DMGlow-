@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DMGlow Emotional Intelligence Engine</title>
+
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#C9A227">
+
 <style>
 .analysis-box{
   margin-top:15px;
@@ -16,14 +18,12 @@
   font-size:14px;
   background:rgba(201,162,39,0.08);
 }
-.mode-label{
-  font-size:13px;
-  opacity:0.8;
-  margin-top:5px;
-}
 </style>
-
 </head>
+
+<body>
+
+<!-- PREMIUM MODAL -->
 <div id="premiumModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center;">
   <div style="background:#243447; padding:30px; border-radius:16px; max-width:400px; text-align:center; border:1px solid #C9A227;">
     <h2 style="color:#C9A227;">Upgrade to DMGlow Premium</h2>
@@ -39,7 +39,6 @@
     </button>
   </div>
 </div>
-<body>
 
 <div class="app">
 <h1>DMGlow Emotional Intelligence Engine</h1>
@@ -67,7 +66,7 @@
 <div class="results" id="outputArea"></div>
 
 </div>
-let isPremium = false;
+
 <script>
 
 // ================= GLOBAL =================
@@ -77,8 +76,14 @@ let mediaRecorder=null;
 let audioChunks=[];
 let streamRef=null;
 let recognition=null;
+let isPremium=false;
 
-// ================= MULTI-EMOTION DETECTION =================
+// Load premium state
+if(localStorage.getItem("DMGlowPremium")==="true"){
+  isPremium=true;
+}
+
+// ================= EMOTION DETECTION =================
 function detectEmotion(text){
 text=text.toLowerCase();
 
@@ -98,39 +103,38 @@ score.neutral++;
 }
 
 let primary=Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
-
 return primary;
 }
 
-// ================= REPLY POOLS =================
+// ================= REPLY BANK =================
 const replyBank={
 
 positive:[
-"Confidence like that should be intentional.",
+"Confidence expressed calmly carries weight.",
 "Energy attracts alignment, not randomness.",
-"You speak with certainty — I respect that."
+"You communicate from certainty — that matters."
 ],
 
 vulnerable:[
-"Not everything needs immediate resolution.",
-"Strength also exists in reflection.",
-"Some clarity only comes after pause."
+"Reflection often builds more strength than reaction.",
+"Clarity sometimes requires stillness.",
+"Composure protects long-term value."
 ],
 
 heated:[
-"I prefer precision over reaction.",
-"Intensity rarely builds outcomes.",
-"Let’s recalibrate before we escalate."
+"I prefer precision over escalation.",
+"Intensity without structure rarely wins.",
+"Let’s recalibrate before we advance."
 ],
 
 neutral:[
-"There’s depth behind that.",
-"I’m observing before responding.",
-"Continue — I’m assessing."
+"There’s depth here.",
+"I’m assessing before engaging.",
+"Continue — clarity shapes power."
 ]
 };
 
-// ================= MODE MODIFIERS =================
+// ================= MODE MODIFIER =================
 function applyMode(reply,mode){
 
 if(mode==="strategic")
@@ -146,8 +150,11 @@ if(mode==="business")
 return reply+" Execution matters more than emotion.";
 
 return reply;
-}function unlockPremium(){
-  isPremium = true;
+}
+
+// ================= PREMIUM =================
+function unlockPremium(){
+  isPremium=true;
   localStorage.setItem("DMGlowPremium","true");
   closeModal();
   alert("Premium Activated.");
@@ -155,10 +162,6 @@ return reply;
 
 function closeModal(){
   document.getElementById("premiumModal").style.display="none";
-}
-
-if(localStorage.getItem("DMGlowPremium")==="true"){
-  isPremium = true;
 }
 
 // ================= GENERATOR =================
@@ -186,7 +189,6 @@ selectedText="";
 
 let pool=[...replyBank[emotion]];
 
-// remove already used replies for uniqueness
 pool=pool.filter(r=>!usedReplies.has(r));
 
 if(pool.length===0){
@@ -196,10 +198,10 @@ pool=[...replyBank[emotion]];
 
 pool.sort(()=>0.5-Math.random());
 
-const replyLimit = isPremium ? 3 : 1;
+const replyLimit=isPremium?3:1;
 
 if(!isPremium){
-  document.getElementById("premiumModal").style.display="flex";
+document.getElementById("premiumModal").style.display="flex";
 }
 
 pool.slice(0,replyLimit).forEach(reply=>{
@@ -218,7 +220,6 @@ box.style.border="2px solid white";
 };
 
 outputArea.appendChild(box);
-
 });
 }
 
