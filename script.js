@@ -1,228 +1,248 @@
-/* =====================================
-   DMGLOW CONNECT – MASTER ENGINE V3
-   Scalable • Rotational • Exhaustion Safe
-===================================== */
+/* ==================================================
+   DMGLOW CONNECT – MASTER ENGINE V5
+   Hybrid Blending • Depth Scaling • Premium Lock
+================================================== */
 
 let selectedReply = "";
 
-/* ======================
-   GLOBAL MEMORY SYSTEM
-====================== */
+/* =========================
+   PREMIUM LOCK SYSTEM
+========================= */
 
-let usedFragments = {
+let premiumUnlocked = false;
+
+function unlockPremium(code){
+if(code === "DMGLOW-ELITE-2026"){
+premiumUnlocked = true;
+alert("Premium Mode Activated.");
+}else{
+alert("Invalid Code.");
+}
+}
+
+/* =========================
+   GLOBAL MEMORY ROTATION
+========================= */
+
+const memory = {
 openings: new Set(),
 core: new Set(),
 enhancers: new Set(),
 endings: new Set()
 };
 
-/* ======================
-   CLUSTER DEFINITIONS
-====================== */
+/* =========================
+   DEPTH SETTINGS
+========================= */
+
+const depthLevels = {
+short: 1,
+medium: 2,
+deep: 3
+};
+
+function getDepth(){
+return premiumUnlocked ? "deep" : "medium";
+}
+
+/* =========================
+   CLUSTERS (EXPANDABLE)
+========================= */
+
+function expand(baseArray){
+let expanded = [];
+baseArray.forEach(item=>{
+expanded.push(item);
+expanded.push(item.replace(".", " with precision."));
+expanded.push(item.replace(".", " intentionally."));
+});
+return expanded;
+}
 
 const clusters = {
 
 appreciation: {
-openings: [
-"Your words carry weight.",
-"There’s sincerity in what you said.",
-"That kind of awareness stands out.",
-"I recognize the intention behind that.",
-"That reflects genuine presence.",
-"That level of thoughtfulness is rare.",
-"There’s authenticity in that tone.",
-"I respect the clarity in your message."
-],
-
-core: [
+keywords: /thank|grateful|appreciate|value/i,
+openings: expand([
+"Your words carry intention.",
+"There’s sincerity in what you shared.",
+"I recognize the meaning behind that."
+]),
+core: expand([
 "I respond with grounded gratitude.",
-"I meet sincerity with composed strength.",
-"Appreciation remains steady and intentional.",
-"I return that energy with clarity.",
-"I honor the depth behind it.",
-"Gratitude doesn’t require noise.",
-"Presence answers presence.",
-"Strength remains balanced."
-],
-
-enhancers: [
+"Respect meets respect.",
+"Clarity defines appreciation."
+]),
+enhancers: expand([
 "Consistency builds influence.",
-"Alignment reveals itself naturally.",
-"Strength answers strength.",
-"Presence never forces respect.",
-"Meaning multiplies when valued.",
 "Depth sustains connection.",
-"Energy reflects intention.",
-"Clarity strengthens appreciation."
-]
+"Energy returns refined."
+])
 },
 
 attraction: {
-openings: [
+keywords: /love|miss|desire|chemistry|attracted/i,
+openings: expand([
 "There’s something magnetic in that.",
-"That tone carries subtle confidence.",
-"There’s quiet intensity there.",
-"That kind of expression draws attention.",
-"Presence like that doesn’t go unnoticed.",
-"There’s refined tension in those words.",
-"That energy lingers intentionally."
-],
-
-core: [
+"That tone carries quiet intensity.",
+"Presence like that lingers."
+]),
+core: expand([
 "Attraction grows where composure lives.",
-"Confidence speaks without raising volume.",
-"Control deepens intrigue.",
-"Energy becomes compelling when balanced.",
-"Power doesn’t need to chase.",
-"Stability intensifies desire.",
-"Mystery strengthens presence."
-],
-
-enhancers: [
-"Depth builds tension naturally.",
-"Silence often amplifies interest.",
-"Composure creates desire.",
-"Clarity strengthens allure.",
-"Intent defines connection.",
-"Energy builds momentum quietly."
-]
+"Confidence speaks without effort.",
+"Mystery strengthens connection."
+]),
+enhancers: expand([
+"Silence amplifies interest.",
+"Intent defines attraction.",
+"Depth builds tension naturally."
+])
 },
 
 authority: {
-openings: [
-"I hear what you're saying.",
-"That perspective is noted.",
-"I understand the direction of that.",
-"There’s structure in that statement.",
-"I see the angle clearly.",
+keywords: /respect|business|standard|boundary/i,
+openings: expand([
+"I hear you clearly.",
 "The message is received.",
-"The intention is understood."
-],
-
-core: [
-"I respond with clarity and standards.",
+"I understand the direction."
+]),
+core: expand([
 "Position remains steady.",
 "Execution outweighs reaction.",
-"Structure protects value.",
-"Control defines leadership.",
-"Boundaries remain intact.",
-"Discipline sustains direction."
-],
-
-enhancers: [
-"Timing defines leverage.",
+"Standards remain intact."
+]),
+enhancers: expand([
 "Boundaries create respect.",
-"Consistency builds dominance.",
 "Precision protects power.",
-"Alignment determines outcome.",
-"Standards reinforce authority."
-]
+"Timing defines leverage."
+])
+},
+
+support: {
+keywords: /sad|hurt|confused|tired|down/i,
+openings: expand([
+"I sense the weight in that.",
+"There’s honesty in that expression.",
+"That carries emotion."
+]),
+core: expand([
+"Emotion is valid and controlled.",
+"Strength survives pressure.",
+"Clarity emerges through storms."
+]),
+enhancers: expand([
+"Growth lives inside discomfort.",
+"Balance restores direction.",
+"Resilience builds quietly."
+])
+},
+
+confidence: {
+keywords: /ready|focused|winning|success|determined/i,
+openings: expand([
+"That’s powerful energy.",
+"Confidence is evident there.",
+"Momentum is clear."
+]),
+core: expand([
+"Discipline sustains momentum.",
+"Focus sharpens advantage.",
+"Execution builds dominance."
+]),
+enhancers: expand([
+"Consistency multiplies results.",
+"Standards elevate outcomes.",
+"Direction strengthens power."
+])
 }
 
 };
 
-/* ======================
-   ENDING POOLS
-====================== */
+/* =========================
+   ENDINGS
+========================= */
 
-const endings = {
-
-soft: [
+const endings = expand([
 "And that matters.",
-"It’s appreciated.",
-"That carries weight.",
-"It stays recognized.",
-"And it’s acknowledged.",
-"That remains noted."
-],
-
-poetic: [
-"Energy returns in kind.",
 "Respect travels both directions.",
-"Presence echoes presence.",
-"Depth finds depth.",
-"Clarity sustains alignment.",
-"Strength answers intention."
-],
-
-bold: [
-"That’s how standards rise.",
-"That’s how influence builds.",
 "That’s how alignment grows.",
-"That’s how power stabilizes.",
-"That’s how leadership holds.",
-"That’s how value is reinforced."
-]
+"Presence echoes presence."
+]);
 
-};
+/* =========================
+   DETECTION SYSTEM
+========================= */
 
-/* ======================
-   EMOTION DETECTION
-====================== */
-
-function detectCluster(text){
-
-text = text.toLowerCase();
-
-if(/love|miss|beautiful|attracted|chemistry|desire|magnetic/.test(text))
-return "attraction";
-
-if(/angry|frustrated|respect|standard|serious|business|boundary/.test(text))
-return "authority";
-
-return "appreciation";
+function detectClusters(text){
+let matches = [];
+for (let key in clusters){
+if (clusters[key].keywords.test(text)){
+matches.push(key);
+}
+}
+if(matches.length === 0) matches.push("appreciation");
+return matches;
 }
 
-/* ======================
-   SMART PICK SYSTEM
-====================== */
+/* =========================
+   SMART PICK
+========================= */
 
 function smartPick(array, type){
-
-let filtered = array.filter(item => !usedFragments[type].has(item));
-
-if(filtered.length === 0){
-usedFragments[type].clear();
-filtered = array;
+let available = array.filter(item => !memory[type].has(item));
+if(available.length === 0){
+memory[type].clear();
+available = array;
 }
-
-let choice = filtered[Math.floor(Math.random() * filtered.length)];
-usedFragments[type].add(choice);
-
+let choice = available[Math.floor(Math.random()*available.length)];
+memory[type].add(choice);
 return choice;
 }
 
-/* ======================
-   GENERATE 5 RESPONSES
-====================== */
+/* =========================
+   HYBRID BLEND
+========================= */
+
+function blendClusters(detected){
+if(detected.length === 1) return detected[0];
+return detected[Math.floor(Math.random()*detected.length)];
+}
+
+/* =========================
+   GENERATE
+========================= */
 
 function generateReply(){
 
 const input = document.getElementById("userInput").value.trim();
 if(!input){ alert("Enter a message first."); return; }
 
-const clusterName = detectCluster(input);
-const cluster = clusters[clusterName];
-
 const output = document.getElementById("outputArea");
 output.innerHTML = "";
+selectedReply = "";
+
+const detected = detectClusters(input);
+const depth = getDepth();
 
 for(let i=0;i<5;i++){
+
+let clusterName = blendClusters(detected);
+let cluster = clusters[clusterName];
 
 let opening = smartPick(cluster.openings, "openings");
 let core = smartPick(cluster.core, "core");
 let enhancer = smartPick(cluster.enhancers, "enhancers");
+let ending = smartPick(endings, "endings");
 
-let endingTypes = ["soft","poetic","bold"];
-let endingCategory = endingTypes[i % endingTypes.length];
+let finalReply = opening;
 
-let ending = smartPick(endings[endingCategory], "endings");
+if(depthLevels[depth] >= 2)
+finalReply += "\n" + core;
 
-let finalReply =
-opening + "\n" +
-core + "\n" +
-enhancer + "\n" +
-ending;
+if(depthLevels[depth] >= 3)
+finalReply += "\n" + enhancer;
+
+finalReply += "\n" + ending;
 
 let box = document.createElement("div");
 box.className = "reply-box";
@@ -239,4 +259,4 @@ document.getElementById("shareHelper").innerText="Ready to share your selected r
 output.appendChild(box);
 }
 
-  }
+}
