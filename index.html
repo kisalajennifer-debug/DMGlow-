@@ -6,11 +6,7 @@
 <title>DMGLOW CONNECT – Master Engine</title>
 
 <style>
-
-/* =========================
-   PREMIUM LOADER
-========================= */
-
+/* ===== LOADER ===== */
 #loader{
   position:fixed;
   inset:0;
@@ -21,35 +17,19 @@
   flex-direction:column;
   z-index:9999;
   color:#E8C56C;
-  letter-spacing:1px;
 }
-
 .loader-ring{
-  width:60px;
-  height:60px;
+  width:60px;height:60px;
   border:4px solid rgba(232,197,108,0.2);
   border-top:4px solid #E8C56C;
   border-radius:50%;
   animation:spin 1s linear infinite;
   margin-bottom:18px;
 }
+@keyframes spin{to{transform:rotate(360deg);}}
+.fade-out{opacity:0;visibility:hidden;transition:.6s;}
 
-@keyframes spin{
-  to{transform:rotate(360deg);}
-}
-
-.fade-out{
-  animation:fadeOut .8s forwards;
-}
-
-@keyframes fadeOut{
-  to{opacity:0;visibility:hidden;}
-}
-
-/* =========================
-   GLOBAL
-========================= */
-
+/* ===== GLOBAL ===== */
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
@@ -59,7 +39,6 @@ body{
   justify-content:center;
   padding:40px 15px 120px;
 }
-
 .app{
   width:100%;
   max-width:760px;
@@ -68,50 +47,19 @@ body{
   border-radius:28px;
   padding:38px;
   border:1px solid rgba(232,197,108,0.25);
-  box-shadow:0 30px 70px rgba(0,0,0,0.6);
-  animation:slideUp .6s ease;
 }
-
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(20px);}
-  to{opacity:1;transform:translateY(0);}
-}
-
-h1{
-  text-align:center;
-  color:#E8C56C;
-  margin-bottom:32px;
-  font-weight:600;
-  letter-spacing:.6px;
-}
-
-.section-title{
-  margin-top:30px;
-  margin-bottom:12px;
-  font-weight:600;
-  color:#F1D78A;
-  font-size:15px;
-}
+h1{text-align:center;color:#E8C56C;}
+.section-title{margin-top:30px;margin-bottom:12px;color:#F1D78A;}
 
 textarea{
   width:100%;
   min-height:180px;
   padding:20px;
   border-radius:22px;
-  border:1px solid rgba(232,197,108,0.35);
   background:#14233a;
   color:white;
-  resize:vertical;
-  font-size:14px;
-  transition:.3s;
+  border:1px solid rgba(232,197,108,0.35);
 }
-
-textarea:focus{
-  outline:none;
-  border:1px solid #E8C56C;
-  box-shadow:0 0 16px rgba(232,197,108,.35);
-}
-
 select{
   width:100%;
   padding:15px;
@@ -119,7 +67,6 @@ select{
   background:#14233a;
   color:white;
   border:1px solid rgba(232,197,108,.35);
-  margin-bottom:14px;
 }
 
 .reply-box{
@@ -129,62 +76,30 @@ select{
   background:#14233a;
   border:1px solid rgba(232,197,108,.25);
   cursor:pointer;
-  transition:.35s;
   white-space:pre-line;
 }
-
 .reply-box:hover{
-  transform:translateY(-4px);
   border:1px solid #E8C56C;
-  box-shadow:0 12px 28px rgba(232,197,108,.25);
 }
-
 .reply-box.selected{
   border:2px solid #E8C56C;
-  box-shadow:0 0 24px rgba(232,197,108,.55);
-}
-
-#shareButtons{
-  margin-top:20px;
-  opacity:.5;
-  transition:.3s;
-}
-
-#shareButtons.active{
-  opacity:1;
-}
-
-#shareHelper{
-  font-size:13px;
-  color:#F1D78A;
 }
 
 .generate-bottom{
   position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
+  bottom:0;left:0;width:100%;
   padding:16px;
   background:#0F243A;
-  box-shadow:0 -5px 20px rgba(0,0,0,.6);
 }
-
 .generate-bottom button{
   width:100%;
   padding:16px;
   border:none;
   border-radius:22px;
-  font-weight:600;
   background:linear-gradient(135deg,#F1D78A,#E8C56C);
+  font-weight:600;
   cursor:pointer;
-  transition:.3s;
 }
-
-.generate-bottom button:hover{
-  transform:translateY(-2px);
-  box-shadow:0 10px 22px rgba(232,197,108,.4);
-}
-
 </style>
 </head>
 
@@ -196,30 +111,23 @@ select{
 </div>
 
 <div class="app">
-
 <h1>DMGLOW CONNECT – Master Reply Engine</h1>
 
 <div class="section-title">1. Paste Message</div>
 <textarea id="userInput" placeholder="Paste message here..."></textarea>
 
-<div class="section-title">2. Intensity Control</div>
+<div class="section-title">2. Intensity</div>
 <select id="intensity">
-<option value="auto">Auto Detect</option>
+<option value="auto">Auto</option>
 <option value="1">Soft</option>
 <option value="2">Balanced</option>
 <option value="3">Elevated</option>
 <option value="4">Dominant</option>
-<option value="5">Elite Controlled</option>
+<option value="5">Elite</option>
 </select>
 
 <div class="section-title">3. Generated Replies</div>
 <div id="outputArea"></div>
-
-<div id="shareButtons">
-  <div id="shareHelper">
-    Select a reply to activate sharing.
-  </div>
-</div>
 
 </div>
 
@@ -228,14 +136,117 @@ select{
 </div>
 
 <script>
+
+/* ===== LOADER ===== */
 window.addEventListener("load",()=>{
   setTimeout(()=>{
     document.getElementById("loader").classList.add("fade-out");
   },1200);
 });
-</script>
 
-<script src="script.js"></script>
+/* ===== ENGINE ===== */
+
+const memory={
+openings:new Set(),
+core:new Set(),
+enhancers:new Set(),
+endings:new Set()
+};
+
+function expand(arr){
+let out=[];
+arr.forEach(t=>{
+out.push(t);
+out.push(t.replace(".", " intentionally."));
+out.push(t.replace(".", " with precision."));
+});
+return out;
+}
+
+const clusters={
+appreciation:{
+keywords:/thank|grateful|appreciate|value/i,
+openings:expand(["Your words carry intention.","There’s sincerity in what you shared."]),
+core:expand(["I respond with grounded gratitude.","Respect meets respect."]),
+enhancers:expand(["Consistency builds influence.","Depth sustains connection."])
+},
+attraction:{
+keywords:/love|miss|desire|chemistry|attracted/i,
+openings:expand(["There’s something magnetic in that.","That tone carries quiet intensity."]),
+core:expand(["Attraction grows where composure lives.","Mystery strengthens connection."]),
+enhancers:expand(["Silence amplifies interest.","Depth builds tension naturally."])
+},
+authority:{
+keywords:/respect|business|standard|boundary/i,
+openings:expand(["I hear you clearly.","The message is received."]),
+core:expand(["Position remains steady.","Execution outweighs reaction."]),
+enhancers:expand(["Boundaries create respect.","Timing defines leverage."])
+},
+support:{
+keywords:/sad|hurt|confused|tired|down/i,
+openings:expand(["I sense the weight in that.","There’s honesty in that expression."]),
+core:expand(["Emotion is valid.","Strength survives pressure."]),
+enhancers:expand(["Resilience builds quietly.","Balance restores direction."])
+}
+};
+
+const endings=expand([
+"And that matters.",
+"Presence echoes presence.",
+"That’s how alignment grows."
+]);
+
+function detect(text){
+let matches=[];
+for(let key in clusters){
+if(clusters[key].keywords.test(text)) matches.push(key);
+}
+if(matches.length===0) matches.push("appreciation");
+return matches;
+}
+
+function pick(arr,type){
+let available=arr.filter(i=>!memory[type].has(i));
+if(available.length===0){memory[type].clear();available=arr;}
+let choice=available[Math.floor(Math.random()*available.length)];
+memory[type].add(choice);
+return choice;
+}
+
+function generateReply(){
+
+const input=document.getElementById("userInput").value.trim();
+if(!input){alert("Enter a message first.");return;}
+
+const output=document.getElementById("outputArea");
+output.innerHTML="";
+
+const detected=detect(input);
+
+for(let i=0;i<5;i++){
+
+let cluster=clusters[detected[Math.floor(Math.random()*detected.length)]];
+
+let final=
+pick(cluster.openings,"openings")+"\n"+
+pick(cluster.core,"core")+"\n"+
+pick(cluster.enhancers,"enhancers")+"\n"+
+pick(endings,"endings");
+
+let box=document.createElement("div");
+box.className="reply-box";
+box.textContent=final;
+
+box.onclick=function(){
+document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
+box.classList.add("selected");
+};
+
+output.appendChild(box);
+}
+}
+
+</script>
 
 </body>
 </html>
