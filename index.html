@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMGlow Emotional Intelligence Engine</title>
+<title>DMGlow Connect</title>
 
 <style>
 
@@ -79,7 +78,6 @@ h1{
   text-align:center;
   color:#E8C56C;
   margin-bottom:28px;
-  font-size:24px;
 }
 
 .section-title{
@@ -88,7 +86,6 @@ h1{
   font-weight:600;
   color:#F1D78A;
   font-size:15px;
-  letter-spacing:0.5px;
 }
 
 textarea{
@@ -111,12 +108,6 @@ textarea:focus{
   box-shadow:0 0 16px rgba(232,197,108,0.4);
 }
 
-.controls{
-  display:flex;
-  gap:12px;
-  margin-bottom:12px;
-}
-
 .btn{
   padding:14px;
   border-radius:20px;
@@ -136,43 +127,74 @@ textarea:focus{
   box-shadow:0 10px 22px rgba(232,197,108,0.4);
 }
 
-.secondary{
-  background:#1E2F4A;
-  color:#F1D78A;
-}
-
-.secondary:hover{
-  background:#243a5a;
-}
-
-.recording-indicator{
-  text-align:center;
-  margin-bottom:12px;
-  font-size:14px;
-  color:#F1D78A;
+.reply-box{
+  padding:18px;
+  margin-top:14px;
+  border-radius:20px;
+  background:#14233a;
+  border:1px solid rgba(232,197,108,0.3);
+  cursor:pointer;
+  white-space:pre-line;
   transition:0.3s;
 }
 
-.recording-active{
-  color:#FF5C5C;
-  animation:pulse 1s infinite;
+.reply-box:hover{
+  transform:translateY(-2px);
 }
 
-@keyframes pulse{
-  0%{opacity:1;}
-  50%{opacity:0.5;}
-  100%{opacity:1;}
+.reply-box.selected{
+  border:2px solid #E8C56C;
+  box-shadow:0 0 16px rgba(232,197,108,0.6);
 }
 
-audio{
+.generate-bottom{
+  position:fixed;
+  bottom:0;
+  left:0;
   width:100%;
-  margin-bottom:18px;
+  background:#0F243A;
+  padding:15px;
+  box-shadow:0 -5px 20px rgba(0,0,0,0.5);
 }
 
-select{
+.generate-bottom button{
   width:100%;
-  padding:zl; 
 }
+
+.share-section{
+  margin-top:35px;
+  padding-top:20px;
+  border-top:1px solid rgba(212,175,55,0.4);
+}
+
+.share-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+
+.share-buttons button{
+  flex:1 1 30%;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-size:13px;
+  background:#1E2F4A;
+  color:#D4AF37;
+}
+
+.disabled{
+  opacity:0.4;
+  pointer-events:none;
+}
+
+.helper{
+  font-size:13px;
+  color:#D4AF37;
+}
+
 </style>
 </head>
 
@@ -180,45 +202,21 @@ select{
 
 <div id="loader">
   <div class="loader-ring"></div>
-  DMGlow Premium Engine
+  DMGlow Connect Engine
 </div>
 
 <div class="app">
 
-<h1>DMGlow Emotional Intelligence Engine</h1>
+<h1>DMGlow Connect</h1>
 
-<div class="section-title">1. Paste or Record Message</div>
-<textarea id="userInput" placeholder="Paste message here or record below..."></textarea>
+<div class="section-title">Paste Your Message</div>
+<textarea id="userInput" placeholder="Paste message here..."></textarea>
 
-<div class="controls">
-  <button id="recordBtn" class="btn secondary">🎙 Start</button>
-  <button id="stopBtn" class="btn secondary">⛔ Stop</button>
-</div>
-
-<div id="recordStatus" class="recording-indicator">
-Microphone inactive
-</div>
-
-<audio id="audioPlayback" controls style="display:none;"></audio>
-
-<div class="section-title">2. Select Tone</div>
-<select id="mode">
-<option value="magnetic">Magnetic Authority</option>
-<option value="strategic">Strategic High Value</option>
-<option value="balanced">Power Balanced</option>
-<option value="dating">Dating Psychology</option>
-<option value="business">Corporate / Business</option>
-</select>
-
-<div id="analysisBox" class="analysis-box">
-Emotional insights will appear here.
-</div>
-
-<div class="section-title">3. Generated Replies</div>
+<div class="section-title">Generated Replies</div>
 <div id="outputArea"></div>
 
 <div class="share-section">
-<div class="section-title">4. Share Your Selected Reply</div>
+<div class="section-title">Share Selected Reply</div>
 <div id="shareHelper" class="helper">
 Select a reply above to activate sharing.
 </div>
@@ -227,17 +225,13 @@ Select a reply above to activate sharing.
   <button onclick="copyReply()">Copy</button>
   <button onclick="downloadReply()">Download</button>
   <button onclick="shareWhatsApp()">WhatsApp</button>
-  <button onclick="shareFacebook()">Facebook</button>
-  <button onclick="shareX()">X</button>
-  <button onclick="shareLinkedIn()">LinkedIn</button>
-  <button onclick="shareEmail()">Email</button>
 </div>
 </div>
 
 </div>
 
 <div class="generate-bottom">
-<button class="btn primary" onclick="generateReply()">Generate Intelligent Replies</button>
+<button class="btn primary" onclick="generateReply()">Generate 5 Powerful Replies</button>
 </div>
 
 <script>
@@ -246,69 +240,58 @@ Select a reply above to activate sharing.
 window.addEventListener("load",()=>{
   setTimeout(()=>{
     document.getElementById("loader").classList.add("fade-out");
-  },1200);
+  },1000);
 });
 
-/* YOUR ORIGINAL JS BELOW — UNCHANGED */
+/* ================= MASTER ENGINE ================= */
 
-const replyBank={
-Positive:[
-"Your energy is appreciated. I respond with clarity and grounded strength.",
-"Alignment builds influence. I remain centered.",
-"Confidence becomes powerful when it is controlled."
-],
-Vulnerable:[
-"I understand the depth behind your words. Stability remains my position.",
-"Emotion is valid. Direction remains intentional.",
-"Composure creates leverage even in sensitive moments."
-],
-Heated:[
-"Intensity noted. Precision guides my response.",
-"Reaction fades. Strategy remains.",
-"Control defines strength."
-],
-Neutral:[
-"I observe carefully before responding.",
-"There is more beneath the surface.",
-"I respond with structure and clarity."
-]
+let selectedReply = "";
+
+const clusters = {
+appreciation:{
+openings:["Your words carry weight.","That sincerity stands out.","There’s depth in what you shared."],
+core:["I respond with grounded gratitude.","Appreciation remains intentional.","Presence deserves recognition."],
+enhancers:["Consistency builds influence.","Energy reflects intention.","Clarity strengthens connection."]
+},
+attraction:{
+openings:["There’s something magnetic in that.","That tone carries quiet confidence.","Energy like that lingers."],
+core:["Attraction grows where composure lives.","Control deepens intrigue.","Confidence doesn’t chase."],
+enhancers:["Depth builds tension.","Silence amplifies interest.","Intent defines connection."]
+},
+authority:{
+openings:["That perspective is noted.","I hear you clearly.","The message is understood."],
+core:["Standards remain steady.","Execution outweighs reaction.","Control defines leadership."],
+enhancers:["Timing defines leverage.","Boundaries create respect.","Precision protects power."]
+}
 };
 
-function detectEmotion(text){
+function detectCluster(text){
 text=text.toLowerCase();
-if(/love|happy|excited|beautiful|miss|amazing/.test(text)) return "Positive";
-if(/hurt|sad|alone|confused|disappointed|tired/.test(text)) return "Vulnerable";
-if(/angry|hate|annoyed|frustrated|upset/.test(text)) return "Heated";
-return "Neutral";
+if(/love|attract|chemistry|miss/.test(text)) return "attraction";
+if(/angry|respect|business|serious|boundary/.test(text)) return "authority";
+return "appreciation";
 }
 
-let selectedReply="";
-let recordedBlob=null;
+function pick(arr){
+return arr[Math.floor(Math.random()*arr.length)];
+}
 
 function generateReply(){
+
 const input=document.getElementById("userInput").value.trim();
 if(!input){ alert("Enter a message first."); return; }
 
-const emotion=detectEmotion(input);
-const mode=document.getElementById("mode").value;
-
-document.getElementById("analysisBox").innerHTML=
-"<strong>Detected:</strong> "+emotion+" | <strong>Mode:</strong> "+mode;
-
+const cluster=clusters[detectCluster(input)];
 const output=document.getElementById("outputArea");
 output.innerHTML="";
-selectedReply="";
 
-let pool=[...replyBank[emotion]];
-pool.sort(()=>0.5-Math.random());
+for(let i=0;i<5;i++){
 
-pool.slice(0,3).forEach(reply=>{
-let final=reply;
-
-if(mode==="strategic") final+=" Timing defines leverage.";
-if(mode==="balanced") final+=" Power remains centered.";
-if(mode==="dating") final+=" Emotional control deepens attraction.";
-if(mode==="business") final+=" Execution outweighs emotion.";
+let final =
+pick(cluster.openings)+"\n"+
+pick(cluster.core)+"\n"+
+pick(cluster.enhancers)+"\n"+
+"That carries weight.";
 
 let box=document.createElement("div");
 box.className="reply-box";
@@ -319,13 +302,30 @@ document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"
 box.classList.add("selected");
 selectedReply=final;
 document.getElementById("shareButtons").classList.remove("disabled");
-document.getElementById("shareHelper").innerText="Ready to share your selected response.";
+document.getElementById("shareHelper").innerText="Ready to share.";
 };
 
 output.appendChild(box);
-});
+}
+
+}
+
+/* SHARE */
+function copyReply(){ navigator.clipboard.writeText(selectedReply); }
+
+function downloadReply(){
+const blob=new Blob([selectedReply],{type:"text/plain"});
+const link=document.createElement("a");
+link.href=URL.createObjectURL(blob);
+link.download="DMGlowReply.txt";
+link.click();
+}
+
+function shareWhatsApp(){
+window.open("https://wa.me/?text="+encodeURIComponent(selectedReply));
 }
 
 </script>
+
 </body>
 </html>
