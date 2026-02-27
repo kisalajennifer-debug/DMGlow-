@@ -9,8 +9,8 @@
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
-  background:#0F243A;
-  color:white;
+  background:linear-gradient(180deg,#0B1C2D,#0F243A);
+  color:#F5F7FA;
   display:flex;
   justify-content:center;
   padding:40px 15px 120px;
@@ -19,30 +19,55 @@ body{
 .app{
   width:100%;
   max-width:760px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(22px);
+  border-radius:28px;
+  padding:38px;
+  border:1px solid rgba(232,197,108,0.25);
+  box-shadow:0 30px 70px rgba(0,0,0,0.6);
+}
+
+h1{
+  text-align:center;
+  color:#E8C56C;
+  margin-bottom:32px;
 }
 
 textarea{
   width:100%;
-  min-height:140px;
-  padding:15px;
-  border-radius:12px;
-  border:none;
-  margin-bottom:15px;
+  min-height:160px;
+  padding:20px;
+  border-radius:22px;
+  border:1px solid rgba(232,197,108,0.35);
+  background:#14233a;
+  color:white;
+  resize:vertical;
+  font-size:14px;
+}
+
+textarea:focus{
+  outline:none;
+  border:1px solid #E8C56C;
+  box-shadow:0 0 16px rgba(232,197,108,.35);
 }
 
 select{
   width:100%;
-  padding:10px;
-  border-radius:10px;
+  padding:15px;
+  border-radius:18px;
+  background:#14233a;
+  color:white;
+  border:1px solid rgba(232,197,108,.35);
   margin-bottom:20px;
 }
 
 .reply-box{
-  padding:15px;
-  margin-top:12px;
-  border-radius:12px;
+  padding:22px;
+  margin-top:16px;
+  border-radius:22px;
   background:#14233a;
-  cursor:pointer;
+  border:1px solid rgba(232,197,108,.25);
+  white-space:pre-line;
 }
 
 .generate-bottom{
@@ -50,17 +75,17 @@ select{
   bottom:0;
   left:0;
   width:100%;
-  padding:15px;
+  padding:16px;
   background:#0F243A;
 }
 
 .generate-bottom button{
   width:100%;
-  padding:15px;
+  padding:16px;
   border:none;
-  border-radius:12px;
-  background:#E8C56C;
-  font-weight:bold;
+  border-radius:22px;
+  font-weight:600;
+  background:linear-gradient(135deg,#F1D78A,#E8C56C);
   cursor:pointer;
 }
 </style>
@@ -70,11 +95,12 @@ select{
 
 <div class="app">
 
-<h2>DMGLOW CONNECT – Master Reply Engine</h2>
+<h1>DMGLOW CONNECT – Master Reply Engine</h1>
 
 <textarea id="userInput" placeholder="Paste message here..."></textarea>
 
 <select id="intensity">
+<option value="auto">Auto Detect</option>
 <option value="1">Soft</option>
 <option value="2">Balanced</option>
 <option value="3">Elevated</option>
@@ -91,27 +117,49 @@ select{
 </div>
 
 <script>
+function autoDetectTone(text){
+  if(text.includes("?")) return 2;
+  if(text.length < 30) return 3;
+  if(text.toLowerCase().includes("why")) return 4;
+  return 2;
+}
+
 function generateReply(){
 
-  const input = document.getElementById("userInput").value;
+  const input = document.getElementById("userInput").value.trim();
   const output = document.getElementById("outputArea");
+  let level = document.getElementById("intensity").value;
 
   if(!input){
     alert("Paste a message first.");
     return;
   }
 
-  output.innerHTML = "";
-
-  for(let i=1;i<=5;i++){
-    const div = document.createElement("div");
-    div.className = "reply-box";
-    div.innerText = "Elite Reply " + i + ":\n\n" +
-                    "I hear you clearly. Here's a confident response crafted from your message:\n\n\"" 
-                    + input + "\"\n\n(Refined with DMGLOW tone level)";
-    output.appendChild(div);
+  if(level === "auto"){
+    level = autoDetectTone(input);
   }
 
+  output.innerHTML = "";
+
+  const replies = [
+
+    "Soft Response:\n\nI understand where you're coming from. Let’s approach this calmly and clearly:\n\n\"" + input + "\"",
+
+    "Balanced Response:\n\nI hear your message. Here's a composed and confident reply:\n\n\"" + input + "\"",
+
+    "Elevated Response:\n\nLet’s clarify this properly. My perspective on this is:\n\n\"" + input + "\"",
+
+    "Dominant Response:\n\nI’m addressing this directly. Here’s the position I’m taking:\n\n\"" + input + "\"",
+
+    "Elite Controlled Response:\n\nI move with clarity and control. This is my final response:\n\n\"" + input + "\""
+  ];
+
+  for(let i=0;i<5;i++){
+    const div = document.createElement("div");
+    div.className = "reply-box";
+    div.innerText = replies[i];
+    output.appendChild(div);
+  }
 }
 </script>
 
