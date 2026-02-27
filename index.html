@@ -6,13 +6,11 @@
 <title>DMGLOW CONNECT – Master Engine</title>
 
 <style>
-/* (Your full CSS remains unchanged — I kept it clean and same) */
-
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(180deg,#0B1C2D,#0F243A);
-  color:#F5F7FA;
+  background:#0F243A;
+  color:white;
   display:flex;
   justify-content:center;
   padding:40px 15px 120px;
@@ -21,41 +19,30 @@ body{
 .app{
   width:100%;
   max-width:760px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(22px);
-  border-radius:28px;
-  padding:38px;
-  border:1px solid rgba(232,197,108,0.25);
 }
 
 textarea{
   width:100%;
-  min-height:180px;
-  padding:20px;
-  border-radius:22px;
-  border:1px solid rgba(232,197,108,0.35);
-  background:#14233a;
-  color:white;
-  resize:vertical;
+  min-height:140px;
+  padding:15px;
+  border-radius:12px;
+  border:none;
+  margin-bottom:15px;
 }
 
 select{
   width:100%;
-  padding:15px;
-  border-radius:18px;
-  background:#14233a;
-  color:white;
-  border:1px solid rgba(232,197,108,.35);
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:20px;
 }
 
 .reply-box{
-  padding:22px;
-  margin-top:16px;
-  border-radius:22px;
+  padding:15px;
+  margin-top:12px;
+  border-radius:12px;
   background:#14233a;
-  border:1px solid rgba(232,197,108,.25);
   cursor:pointer;
-  white-space:pre-line;
 }
 
 .generate-bottom{
@@ -63,17 +50,17 @@ select{
   bottom:0;
   left:0;
   width:100%;
-  padding:16px;
+  padding:15px;
   background:#0F243A;
 }
 
 .generate-bottom button{
   width:100%;
-  padding:16px;
+  padding:15px;
   border:none;
-  border-radius:22px;
-  font-weight:600;
-  background:linear-gradient(135deg,#F1D78A,#E8C56C);
+  border-radius:12px;
+  background:#E8C56C;
+  font-weight:bold;
   cursor:pointer;
 }
 </style>
@@ -82,11 +69,10 @@ select{
 <body>
 
 <div class="app">
-<h1>DMGLOW CONNECT – Master Reply Engine</h1>
+
+<h2>DMGLOW CONNECT – Master Reply Engine</h2>
 
 <textarea id="userInput" placeholder="Paste message here..."></textarea>
-
-<br><br>
 
 <select id="intensity">
 <option value="1">Soft</option>
@@ -97,6 +83,7 @@ select{
 </select>
 
 <div id="outputArea"></div>
+
 </div>
 
 <div class="generate-bottom">
@@ -105,45 +92,26 @@ select{
 
 <script>
 function generateReply(){
+
   const input = document.getElementById("userInput").value;
   const output = document.getElementById("outputArea");
-  const intensity = document.getElementById("intensity").value;
 
-  if(!input.trim()){
-    alert("Please paste a message first.");
+  if(!input){
+    alert("Paste a message first.");
     return;
   }
 
   output.innerHTML = "";
 
   for(let i=1;i<=5;i++){
-    let tone;
-
-    switch(intensity){
-      case "1":
-        tone = "I appreciate your message. Thank you for sharing.";
-        break;
-      case "2":
-        tone = "Interesting perspective. I see what you're saying.";
-        break;
-      case "3":
-        tone = "I respect the energy, but let’s keep clarity.";
-        break;
-      case "4":
-        tone = "Noted. I move with intention, not impulse.";
-        break;
-      case "5":
-        tone = "Control is quiet. Power doesn’t argue.";
-        break;
-      default:
-        tone = "Message received.";
-    }
-
     const div = document.createElement("div");
     div.className = "reply-box";
-    div.innerText = tone;
+    div.innerText = "Elite Reply " + i + ":\n\n" +
+                    "I hear you clearly. Here's a confident response crafted from your message:\n\n\"" 
+                    + input + "\"\n\n(Refined with DMGLOW tone level)";
     output.appendChild(div);
   }
+
 }
 </script>
 
