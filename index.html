@@ -235,35 +235,33 @@ return reply;
 
 /* ================= GENERATOR ================= */
 
-async function generateReply(){
+  async function generateReply() {
 
-const input=document.getElementById("userInput").value.trim();
-if(!input){ alert("Enter or speak a message first."); return; }
+  const input = document.getElementById("userInput").value.trim();
+  const mode = document.getElementById("mode").value;
 
-const mode=document.getElementById("mode").value;
+  if (!input) {
+    alert("Enter a message first.");
+    return;
+  }
 
-const response = await fetch("https://YOUR-BACKEND-URL/generate", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    message: input,
-    mode: mode
-  })
-});
+  const response = await fetch("/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: input,
+      mode: mode
+    })
+  });
 
-const data = await response.json();
+  const data = await response.json();
 
-const output=document.getElementById("outputArea");
-output.innerHTML="";
-
-const box=document.createElement("div");
-box.className="reply-box";
-box.textContent=data.reply;
-
-output.appendChild(box);
+  document.getElementById("outputArea").innerHTML =
+    `<div class="reply-box">${data.reply}</div>`;
 }
+
 
 /* ================= SPEECH TO TEXT ================= */
 
