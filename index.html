@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -43,15 +44,18 @@ textarea{
   margin-bottom:20px;
 }
 
+button{
+  padding:14px;
+  border-radius:16px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+
 .generate-btn{
   width:100%;
-  padding:15px;
-  border-radius:18px;
-  border:none;
   background:linear-gradient(135deg,#D4AF37,#C6A643);
   color:#0B1C2D;
-  font-weight:600;
-  cursor:pointer;
   margin-bottom:15px;
 }
 
@@ -63,6 +67,8 @@ textarea{
 
 .controls button{
   flex:1;
+  background:#1d3557;
+  color:white;
 }
 
 .recording-indicator{
@@ -119,10 +125,8 @@ select{
 
 .share-section button{
   flex:1;
-  padding:10px;
-  border-radius:12px;
-  border:none;
-  cursor:pointer;
+  background:#2a4d69;
+  color:white;
 }
 </style>
 </head>
@@ -139,8 +143,8 @@ Generate Intelligent Replies
 </button>
 
 <div class="controls">
-  <button id="recordBtn" class="generate-btn">🎙 Start Recording</button>
-  <button id="stopBtn" class="generate-btn">⛔ Stop</button>
+  <button id="recordBtn">🎙 Start</button>
+  <button id="stopBtn">⛔ Stop</button>
 </div>
 
 <div class="recording-indicator" id="recordStatus">
@@ -175,7 +179,7 @@ Emotional insights will appear here.
 
 <script>
 
-/* ========= REPLY ENGINE ========= */
+/* ===== REPLY ENGINE ===== */
 
 const replyBank={
 Positive:[
@@ -212,7 +216,6 @@ let selectedReply="";
 let recordedBlob=null;
 
 function generateReply(){
-
 const input=document.getElementById("userInput").value.trim();
 if(!input){ alert("Enter a message first."); return; }
 
@@ -230,6 +233,7 @@ output.innerHTML="";
 
 pool.slice(0,3).forEach(reply=>{
 let final=reply;
+
 if(mode==="strategic") final+=" Timing defines leverage.";
 if(mode==="balanced") final+=" Power remains centered.";
 if(mode==="dating") final+=" Emotional control deepens attraction.";
@@ -250,12 +254,13 @@ output.appendChild(box);
 });
 }
 
-/* ========= AUDIO RECORDING ========= */
+/* ===== STABLE RECORDING ===== */
 
 let mediaRecorder;
 let audioChunks=[];
 let timerInterval;
 let seconds=0;
+let currentStream=null;
 
 const recordBtn=document.getElementById("recordBtn");
 const stopBtn=document.getElementById("stopBtn");
@@ -263,34 +268,47 @@ const recordStatus=document.getElementById("recordStatus");
 const audioPlayback=document.getElementById("audioPlayback");
 
 recordBtn.onclick=async function(){
-const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-mediaRecorder=new MediaRecorder(stream);
+
+if(mediaRecorder && mediaRecorder.state==="recording") return;
+
+try{
+currentStream=await navigator.mediaDevices.getUserMedia({audio:true});
+mediaRecorder=new MediaRecorder(currentStream,{mimeType:"audio/webm"});
 
 audioChunks=[];
-mediaRecorder.start();
-
-recordStatus.innerText="🎙 Recording... 00:00";
+mediaRecorder.start(1000);
 
 seconds=0;
+recordStatus.innerText="🎙 Recording... 00:00";
+recordBtn.innerText="Recording...";
+
 timerInterval=setInterval(()=>{
 seconds++;
 let mins=Math.floor(seconds/60);
 let secs=seconds%60;
-recordStatus.innerText=`🎙 Recording... ${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+recordStatus.innerText=
+`🎙 Recording... ${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
 },1000);
 
-mediaRecorder.ondataavailable=e=>{
-audioChunks.push(e.data);
+mediaRecorder.ondataavailable=function(e){
+if(e.data.size>0) audioChunks.push(e.data);
 };
 
-mediaRecorder.onstop=e=>{
+mediaRecorder.onstop=function(){
 clearInterval(timerInterval);
 recordStatus.innerText="Recording stopped";
+recordBtn.innerText="🎙 Start";
 
 recordedBlob=new Blob(audioChunks,{type:"audio/webm"});
 audioPlayback.src=URL.createObjectURL(recordedBlob);
 audioPlayback.style.display="block";
+
+currentStream.getTracks().forEach(track=>track.stop());
 };
+
+}catch(err){
+alert("Microphone not supported or permission denied.");
+}
 };
 
 stopBtn.onclick=function(){
@@ -299,7 +317,7 @@ mediaRecorder.stop();
 }
 };
 
-/* ========= SHARE ========= */
+/* ===== SHARE ===== */
 
 function copyReply(){
 navigator.clipboard.writeText(selectedReply);
@@ -331,5 +349,6 @@ window.location.href="mailto:?subject=DMGlow Reply&body="+encodeURIComponent(sel
 }
 
 </script>
+
 </body>
 </html>
