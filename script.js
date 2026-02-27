@@ -1,14 +1,19 @@
 /* ==================================================
-   DMGLOW CONNECT – MASTER ENGINE V7 (STABLE)
+   DMGLOW CONNECT – MASTER ENGINE V8 (LOCKED STABLE)
 ================================================== */
 
+document.addEventListener("DOMContentLoaded", function(){
+
+/* =========================
+   GLOBAL STATE
+========================= */
+
 let selectedReply = "";
+let premiumUnlocked = false;
 
 /* =========================
    PREMIUM LOCK SYSTEM
 ========================= */
-
-let premiumUnlocked = false;
 
 function unlockPremium(code){
 if(code === "DMGLOW-ELITE-2026"){
@@ -20,7 +25,7 @@ alert("Invalid Code.");
 }
 
 /* =========================
-   GLOBAL MEMORY ROTATION
+   MEMORY ROTATION
 ========================= */
 
 const memory = {
@@ -53,7 +58,6 @@ authority: "Structure protects value."
 
 function analyzeTone(text){
 text = text.toLowerCase();
-
 return {
 emotional: /sad|hurt|miss|love|confused/.test(text),
 strategic: /plan|next|decision|future/.test(text),
@@ -194,10 +198,20 @@ return choice;
 
 function generateReply(){
 
-const input=document.getElementById("userInput").value.trim();
-if(!input){ alert("Enter a message first."); return; }
+const inputField = document.getElementById("userInput");
+const output = document.getElementById("outputArea");
 
-const output=document.getElementById("outputArea");
+if(!inputField || !output){
+console.error("Missing required DOM elements.");
+return;
+}
+
+const input=inputField.value.trim();
+if(!input){
+alert("Enter a message first.");
+return;
+}
+
 output.innerHTML="";
 selectedReply="";
 
@@ -225,8 +239,6 @@ finalReply+="\n"+enhancer;
 
 finalReply+="\n"+ending;
 
-/* Tone Injection */
-
 finalReply+="\n"+toneLayers.smooth;
 
 if(tone.strategic) finalReply+="\n"+toneLayers.dominant;
@@ -237,14 +249,24 @@ let box=document.createElement("div");
 box.className="reply-box";
 box.textContent=finalReply;
 
-/* SAFE CLICK HANDLER */
-box.onclick=function(){
+box.addEventListener("click", function(){
 document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
 box.classList.add("selected");
 selectedReply=finalReply;
-};
+});
 
 output.appendChild(box);
 }
 
 }
+
+/* =========================
+   SAFE BUTTON BINDING
+========================= */
+
+const generateBtn = document.querySelector(".generate-bottom button");
+if(generateBtn){
+generateBtn.addEventListener("click", generateReply);
+}
+
+});
