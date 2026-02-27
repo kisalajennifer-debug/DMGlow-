@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,6 @@
 <style>
 
 /* ================= GLOBAL ================= */
-
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
@@ -36,8 +35,7 @@ h1{
   font-weight:600;
 }
 
-/* TEXTAREA (TOP) */
-
+/* TEXTAREA */
 textarea{
   width:100%;
   min-height:140px;
@@ -56,7 +54,6 @@ textarea:focus{
 }
 
 /* BUTTONS */
-
 .generate-btn{
   width:100%;
   padding:16px;
@@ -84,8 +81,7 @@ textarea:focus{
   flex:1;
 }
 
-/* MODE SELECT */
-
+/* SELECT */
 select{
   width:100%;
   padding:15px;
@@ -97,7 +93,6 @@ select{
 }
 
 /* ANALYSIS */
-
 .analysis-box{
   padding:16px;
   border-radius:16px;
@@ -107,8 +102,7 @@ select{
   font-size:14px;
 }
 
-/* REPLIES */
-
+/* RESULTS */
 .results{
   margin-top:20px;
 }
@@ -120,6 +114,11 @@ select{
   background:#14233a;
   border:1px solid rgba(212,175,55,0.4);
   cursor:pointer;
+  transition:0.2s ease;
+}
+
+.reply-box:hover{
+  background:#1d3557;
 }
 
 .reply-box.selected{
@@ -128,7 +127,6 @@ select{
 }
 
 /* PREMIUM MODAL */
-
 .premium-modal{
   display:none;
   position:fixed;
@@ -169,21 +167,21 @@ select{
 
 <h1>DMGlow Emotional Intelligence Engine</h1>
 
-<!-- 1️⃣ MESSAGE BOX -->
+<!-- 1 MESSAGE -->
 <textarea id="userInput" placeholder="Paste the message you received..."></textarea>
 
-<!-- 2️⃣ GENERATE -->
+<!-- 2 GENERATE -->
 <button class="generate-btn" onclick="generateReply()">
 Generate Intelligent Replies
 </button>
 
-<!-- 3️⃣ MICROPHONE -->
+<!-- 3 MICROPHONE -->
 <div class="mic-controls">
   <button id="startMic" class="generate-btn">🎤 Start</button>
   <button id="stopMic" class="generate-btn">⛔ Stop</button>
 </div>
 
-<!-- 4️⃣ TONE SELECT -->
+<!-- 4 MODE -->
 <select id="mode">
 <option value="magnetic">Magnetic Authority</option>
 <option value="strategic">Strategic High Value</option>
@@ -192,20 +190,19 @@ Generate Intelligent Replies
 <option value="business">Corporate / Business</option>
 </select>
 
-<!-- 5️⃣ ANALYSIS -->
+<!-- 5 ANALYSIS -->
 <div id="analysisBox" class="analysis-box">
 Your emotional calibration insights will appear here.
 </div>
 
-<!-- 6️⃣ RESULTS -->
+<!-- 6 RESULTS -->
 <div class="results" id="outputArea"></div>
 
 </div>
 
 <script>
 
-/* ===== TRIAL SYSTEM ===== */
-
+/* ===== TRIAL ===== */
 const TRIAL_DAYS = 3;
 let trialStart = localStorage.getItem("DMGlowTrialStart");
 
@@ -218,8 +215,7 @@ const daysPassed = (Date.now() - trialStart)/(1000*60*60*24);
 let trialActive = daysPassed <= TRIAL_DAYS;
 let isPremium = localStorage.getItem("DMGlowPremium")==="true";
 
-/* ===== EMOTION DETECTION ===== */
-
+/* ===== EMOTION ===== */
 function detectEmotion(text){
 text=text.toLowerCase();
 if(/love|happy|excited|beautiful|miss|amazing/.test(text)) return "Positive";
@@ -244,7 +240,6 @@ return reply;
 }
 
 /* ===== GENERATE ===== */
-
 function generateReply(){
 
 const input=document.getElementById("userInput").value.trim();
@@ -263,10 +258,9 @@ document.getElementById("analysisBox").innerHTML=
 "<br><strong>Mode:</strong> "+mode;
 
 let pool=[...replyBank[emotion]];
-pool.sort(()=>0.5-Math.random());
+pool.sort(()=>Math.random()-0.5);
 
 const limit=isPremium?3:2;
-
 const output=document.getElementById("outputArea");
 output.innerHTML="";
 
@@ -274,16 +268,17 @@ pool.slice(0,limit).forEach(reply=>{
 let box=document.createElement("div");
 box.className="reply-box";
 box.textContent=applyMode(reply,mode);
+
 box.onclick=function(){
 document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
 box.classList.add("selected");
 };
+
 output.appendChild(box);
 });
 }
 
 /* ===== SPEECH ===== */
-
 let recognition;
 
 if('webkitSpeechRecognition' in window){
@@ -300,8 +295,11 @@ recognition.stop();
 };
 
 recognition.onresult=function(event){
-document.getElementById("userInput").value=
-event.results[event.results.length-1][0].transcript;
+let transcript="";
+for(let i=event.resultIndex;i<event.results.length;i++){
+transcript+=event.results[i][0].transcript;
+}
+document.getElementById("userInput").value+=transcript+" ";
 };
 }else{
 document.getElementById("startMic").disabled=true;
@@ -309,7 +307,6 @@ document.getElementById("stopMic").disabled=true;
 }
 
 /* ===== PREMIUM ===== */
-
 function unlockPremium(){
 isPremium=true;
 localStorage.setItem("DMGlowPremium","true");
