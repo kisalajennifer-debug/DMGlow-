@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMGlow Connect</title>
+<title>DMGLOW CONNECT – Master Engine</title>
 
 <style>
 
-/* ===== PREMIUM LOADER ===== */
+/* =========================
+   PREMIUM LOADER
+========================= */
 
 #loader{
   position:fixed;
@@ -16,10 +18,9 @@
   display:flex;
   justify-content:center;
   align-items:center;
-  z-index:9999;
   flex-direction:column;
+  z-index:9999;
   color:#E8C56C;
-  font-weight:600;
   letter-spacing:1px;
 }
 
@@ -30,22 +31,24 @@
   border-top:4px solid #E8C56C;
   border-radius:50%;
   animation:spin 1s linear infinite;
-  margin-bottom:20px;
+  margin-bottom:18px;
 }
 
 @keyframes spin{
-  to{ transform:rotate(360deg); }
+  to{transform:rotate(360deg);}
 }
 
 .fade-out{
-  animation:fadeOut 0.8s forwards;
+  animation:fadeOut .8s forwards;
 }
 
 @keyframes fadeOut{
-  to{ opacity:0; visibility:hidden; }
+  to{opacity:0;visibility:hidden;}
 }
 
-/* ===== GLOBAL ===== */
+/* =========================
+   GLOBAL
+========================= */
 
 body{
   margin:0;
@@ -54,145 +57,133 @@ body{
   color:#F5F7FA;
   display:flex;
   justify-content:center;
-  padding:25px 12px 120px 12px;
+  padding:40px 15px 120px;
 }
 
 .app{
   width:100%;
-  max-width:720px;
+  max-width:760px;
   background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(20px);
-  padding:34px;
-  border-radius:26px;
-  box-shadow:0 25px 60px rgba(0,0,0,0.55);
+  backdrop-filter:blur(22px);
+  border-radius:28px;
+  padding:38px;
   border:1px solid rgba(232,197,108,0.25);
-  animation:slideUp 0.6s ease;
+  box-shadow:0 30px 70px rgba(0,0,0,0.6);
+  animation:slideUp .6s ease;
 }
 
 @keyframes slideUp{
-  from{ opacity:0; transform:translateY(20px); }
-  to{ opacity:1; transform:translateY(0); }
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
 }
 
 h1{
   text-align:center;
   color:#E8C56C;
-  margin-bottom:28px;
+  margin-bottom:32px;
+  font-weight:600;
+  letter-spacing:.6px;
 }
 
 .section-title{
-  margin-top:28px;
+  margin-top:30px;
   margin-bottom:12px;
   font-weight:600;
   color:#F1D78A;
   font-size:15px;
 }
 
+/* =========================
+   INPUT
+========================= */
+
 textarea{
   width:100%;
-  min-height:170px;
-  padding:18px;
-  border-radius:20px;
-  border:1px solid rgba(232,197,108,0.4);
+  min-height:180px;
+  padding:20px;
+  border-radius:22px;
+  border:1px solid rgba(232,197,108,0.35);
   background:#14233a;
   color:white;
   resize:vertical;
-  margin-bottom:18px;
   font-size:14px;
-  transition:0.3s;
+  transition:.3s;
 }
 
 textarea:focus{
   outline:none;
   border:1px solid #E8C56C;
-  box-shadow:0 0 16px rgba(232,197,108,0.4);
+  box-shadow:0 0 16px rgba(232,197,108,.35);
 }
 
-.btn{
-  padding:14px;
-  border-radius:20px;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-  transition:0.3s;
+/* =========================
+   SELECTS
+========================= */
+
+select{
+  width:100%;
+  padding:15px;
+  border-radius:18px;
+  background:#14233a;
+  color:white;
+  border:1px solid rgba(232,197,108,.35);
+  margin-bottom:14px;
 }
 
-.primary{
-  background:linear-gradient(135deg,#F1D78A,#E8C56C);
-  color:#0A1624;
-}
-
-.primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 10px 22px rgba(232,197,108,0.4);
-}
+/* =========================
+   OUTPUT CARDS
+========================= */
 
 .reply-box{
-  padding:18px;
-  margin-top:14px;
-  border-radius:20px;
+  padding:22px;
+  margin-top:16px;
+  border-radius:22px;
   background:#14233a;
-  border:1px solid rgba(232,197,108,0.3);
+  border:1px solid rgba(232,197,108,.25);
   cursor:pointer;
+  transition:.35s;
   white-space:pre-line;
-  transition:0.3s;
 }
 
 .reply-box:hover{
-  transform:translateY(-2px);
+  transform:translateY(-4px);
+  border:1px solid #E8C56C;
+  box-shadow:0 12px 28px rgba(232,197,108,.25);
 }
 
 .reply-box.selected{
   border:2px solid #E8C56C;
-  box-shadow:0 0 16px rgba(232,197,108,0.6);
+  box-shadow:0 0 24px rgba(232,197,108,.55);
 }
+
+/* =========================
+   GENERATE BUTTON
+========================= */
 
 .generate-bottom{
   position:fixed;
   bottom:0;
   left:0;
   width:100%;
+  padding:16px;
   background:#0F243A;
-  padding:15px;
-  box-shadow:0 -5px 20px rgba(0,0,0,0.5);
+  box-shadow:0 -5px 20px rgba(0,0,0,.6);
 }
 
 .generate-bottom button{
   width:100%;
-}
-
-.share-section{
-  margin-top:35px;
-  padding-top:20px;
-  border-top:1px solid rgba(212,175,55,0.4);
-}
-
-.share-buttons{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:10px;
-}
-
-.share-buttons button{
-  flex:1 1 30%;
-  padding:10px;
-  border-radius:12px;
+  padding:16px;
   border:none;
+  border-radius:22px;
+  font-weight:600;
+  background:linear-gradient(135deg,#F1D78A,#E8C56C);
   cursor:pointer;
-  font-size:13px;
-  background:#1E2F4A;
-  color:#D4AF37;
+  transition:.3s;
 }
 
-.disabled{
-  opacity:0.4;
-  pointer-events:none;
-}
-
-.helper{
-  font-size:13px;
-  color:#D4AF37;
+.generate-bottom button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 22px rgba(232,197,108,.4);
 }
 
 </style>
@@ -202,128 +193,45 @@ textarea:focus{
 
 <div id="loader">
   <div class="loader-ring"></div>
-  DMGlow Connect Engine
+  DMGLOW CONNECT Initializing
 </div>
 
 <div class="app">
 
-<h1>DMGlow Connect</h1>
+<h1>DMGLOW CONNECT – Master Reply Engine</h1>
 
-<div class="section-title">Paste Your Message</div>
+<div class="section-title">1. Paste Message</div>
 <textarea id="userInput" placeholder="Paste message here..."></textarea>
 
-<div class="section-title">Generated Replies</div>
+<div class="section-title">2. Intensity Control</div>
+<select id="intensity">
+<option value="auto">Auto Detect</option>
+<option value="1">Soft</option>
+<option value="2">Balanced</option>
+<option value="3">Elevated</option>
+<option value="4">Dominant</option>
+<option value="5">Elite Controlled</option>
+</select>
+
+<div class="section-title">3. Generated Replies</div>
 <div id="outputArea"></div>
-
-<div class="share-section">
-<div class="section-title">Share Selected Reply</div>
-<div id="shareHelper" class="helper">
-Select a reply above to activate sharing.
-</div>
-
-<div id="shareButtons" class="share-buttons disabled">
-  <button onclick="copyReply()">Copy</button>
-  <button onclick="downloadReply()">Download</button>
-  <button onclick="shareWhatsApp()">WhatsApp</button>
-</div>
-</div>
 
 </div>
 
 <div class="generate-bottom">
-<button class="btn primary" onclick="generateReply()">Generate 5 Powerful Replies</button>
+<button onclick="generateReply()">Generate 5 Elite Replies</button>
 </div>
 
 <script>
 
-/* PREMIUM LOAD */
+/* LOADER */
 window.addEventListener("load",()=>{
   setTimeout(()=>{
     document.getElementById("loader").classList.add("fade-out");
-  },1000);
+  },1200);
 });
 
-/* ================= MASTER ENGINE ================= */
-
-let selectedReply = "";
-
-const clusters = {
-appreciation:{
-openings:["Your words carry weight.","That sincerity stands out.","There’s depth in what you shared."],
-core:["I respond with grounded gratitude.","Appreciation remains intentional.","Presence deserves recognition."],
-enhancers:["Consistency builds influence.","Energy reflects intention.","Clarity strengthens connection."]
-},
-attraction:{
-openings:["There’s something magnetic in that.","That tone carries quiet confidence.","Energy like that lingers."],
-core:["Attraction grows where composure lives.","Control deepens intrigue.","Confidence doesn’t chase."],
-enhancers:["Depth builds tension.","Silence amplifies interest.","Intent defines connection."]
-},
-authority:{
-openings:["That perspective is noted.","I hear you clearly.","The message is understood."],
-core:["Standards remain steady.","Execution outweighs reaction.","Control defines leadership."],
-enhancers:["Timing defines leverage.","Boundaries create respect.","Precision protects power."]
-}
-};
-
-function detectCluster(text){
-text=text.toLowerCase();
-if(/love|attract|chemistry|miss/.test(text)) return "attraction";
-if(/angry|respect|business|serious|boundary/.test(text)) return "authority";
-return "appreciation";
-}
-
-function pick(arr){
-return arr[Math.floor(Math.random()*arr.length)];
-}
-
-function generateReply(){
-
-const input=document.getElementById("userInput").value.trim();
-if(!input){ alert("Enter a message first."); return; }
-
-const cluster=clusters[detectCluster(input)];
-const output=document.getElementById("outputArea");
-output.innerHTML="";
-
-for(let i=0;i<5;i++){
-
-let final =
-pick(cluster.openings)+"\n"+
-pick(cluster.core)+"\n"+
-pick(cluster.enhancers)+"\n"+
-"That carries weight.";
-
-let box=document.createElement("div");
-box.className="reply-box";
-box.textContent=final;
-
-box.onclick=function(){
-document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
-box.classList.add("selected");
-selectedReply=final;
-document.getElementById("shareButtons").classList.remove("disabled");
-document.getElementById("shareHelper").innerText="Ready to share.";
-};
-
-output.appendChild(box);
-}
-
-}
-
-/* SHARE */
-function copyReply(){ navigator.clipboard.writeText(selectedReply); }
-
-function downloadReply(){
-const blob=new Blob([selectedReply],{type:"text/plain"});
-const link=document.createElement("a");
-link.href=URL.createObjectURL(blob);
-link.download="DMGlowReply.txt";
-link.click();
-}
-
-function shareWhatsApp(){
-window.open("https://wa.me/?text="+encodeURIComponent(selectedReply));
-}
+/* ENGINE SCRIPT WILL GO HERE */
 
 </script>
 
