@@ -1,6 +1,6 @@
 /* ==================================================
-   DMGLOW CONNECT – MASTER ENGINE V5
-   Hybrid Blending • Depth Scaling • Premium Lock
+   DMGLOW CONNECT – MASTER ENGINE V6
+   Emotional Analytics • Weighted Blending • Premium Depth
 ================================================== */
 
 let selectedReply = "";
@@ -32,7 +32,7 @@ endings: new Set()
 };
 
 /* =========================
-   DEPTH SETTINGS
+   DEPTH CONTROL
 ========================= */
 
 const depthLevels = {
@@ -46,23 +46,33 @@ return premiumUnlocked ? "deep" : "medium";
 }
 
 /* =========================
-   CLUSTERS (EXPANDABLE)
+   SMART EXPANSION ENGINE
 ========================= */
 
 function expand(baseArray){
 let expanded = [];
+
 baseArray.forEach(item=>{
 expanded.push(item);
+
 expanded.push(item.replace(".", " with precision."));
 expanded.push(item.replace(".", " intentionally."));
+expanded.push(item.replace(".", " with composed strength."));
+expanded.push(item.replace(".", " with quiet dominance."));
 });
+
 return expanded;
 }
+
+/* =========================
+   CLUSTERS
+========================= */
 
 const clusters = {
 
 appreciation: {
-keywords: /thank|grateful|appreciate|value/i,
+keywords: /thank|grateful|appreciate|value|admire/i,
+weight: 1,
 openings: expand([
 "Your words carry intention.",
 "There’s sincerity in what you shared.",
@@ -81,7 +91,8 @@ enhancers: expand([
 },
 
 attraction: {
-keywords: /love|miss|desire|chemistry|attracted/i,
+keywords: /love|miss|desire|chemistry|attracted|magnetic/i,
+weight: 1.2,
 openings: expand([
 "There’s something magnetic in that.",
 "That tone carries quiet intensity.",
@@ -100,7 +111,8 @@ enhancers: expand([
 },
 
 authority: {
-keywords: /respect|business|standard|boundary/i,
+keywords: /respect|business|standard|boundary|serious/i,
+weight: 1.3,
 openings: expand([
 "I hear you clearly.",
 "The message is received.",
@@ -119,7 +131,8 @@ enhancers: expand([
 },
 
 support: {
-keywords: /sad|hurt|confused|tired|down/i,
+keywords: /sad|hurt|confused|tired|down|stress/i,
+weight: 1,
 openings: expand([
 "I sense the weight in that.",
 "There’s honesty in that expression.",
@@ -138,7 +151,8 @@ enhancers: expand([
 },
 
 confidence: {
-keywords: /ready|focused|winning|success|determined/i,
+keywords: /ready|focused|winning|success|determined|goal/i,
+weight: 1.1,
 openings: expand([
 "That’s powerful energy.",
 "Confidence is evident there.",
@@ -170,42 +184,67 @@ const endings = expand([
 ]);
 
 /* =========================
-   DETECTION SYSTEM
+   EMOTIONAL ANALYTICS
 ========================= */
 
-function detectClusters(text){
-let matches = [];
-for (let key in clusters){
-if (clusters[key].keywords.test(text)){
-matches.push(key);
+function analyzeEmotion(text){
+let scores = {};
+let lower = text.toLowerCase();
+
+for(let key in clusters){
+let matchCount = (lower.match(clusters[key].keywords) || []).length;
+scores[key] = matchCount * clusters[key].weight;
 }
-}
-if(matches.length === 0) matches.push("appreciation");
-return matches;
+
+let sorted = Object.keys(scores).sort((a,b)=>scores[b]-scores[a]);
+
+if(scores[sorted[0]] === 0) return ["appreciation"];
+
+return sorted.slice(0,2); // top 2 clusters blended
 }
 
 /* =========================
-   SMART PICK
+   SMART PICK SYSTEM
 ========================= */
 
 function smartPick(array, type){
 let available = array.filter(item => !memory[type].has(item));
+
 if(available.length === 0){
 memory[type].clear();
 available = array;
 }
+
 let choice = available[Math.floor(Math.random()*available.length)];
 memory[type].add(choice);
+
 return choice;
 }
 
 /* =========================
-   HYBRID BLEND
+   HYBRID BLENDING
 ========================= */
 
-function blendClusters(detected){
-if(detected.length === 1) return detected[0];
-return detected[Math.floor(Math.random()*detected.length)];
+function buildHybrid(clusterNames){
+
+let selectedClusters = clusterNames.map(name => clusters[name]);
+
+let opening = smartPick(
+selectedClusters[Math.floor(Math.random()*selectedClusters.length)].openings,
+"openings"
+);
+
+let core = smartPick(
+selectedClusters[Math.floor(Math.random()*selectedClusters.length)].core,
+"core"
+);
+
+let enhancer = smartPick(
+selectedClusters[Math.floor(Math.random()*selectedClusters.length)].enhancers,
+"enhancers"
+);
+
+return {opening, core, enhancer};
 }
 
 /* =========================
@@ -221,26 +260,22 @@ const output = document.getElementById("outputArea");
 output.innerHTML = "";
 selectedReply = "";
 
-const detected = detectClusters(input);
+const detected = analyzeEmotion(input);
 const depth = getDepth();
 
 for(let i=0;i<5;i++){
 
-let clusterName = blendClusters(detected);
-let cluster = clusters[clusterName];
+let hybrid = buildHybrid(detected);
 
-let opening = smartPick(cluster.openings, "openings");
-let core = smartPick(cluster.core, "core");
-let enhancer = smartPick(cluster.enhancers, "enhancers");
 let ending = smartPick(endings, "endings");
 
-let finalReply = opening;
+let finalReply = hybrid.opening;
 
 if(depthLevels[depth] >= 2)
-finalReply += "\n" + core;
+finalReply += "\n" + hybrid.core;
 
 if(depthLevels[depth] >= 3)
-finalReply += "\n" + enhancer;
+finalReply += "\n" + hybrid.enhancer;
 
 finalReply += "\n" + ending;
 
