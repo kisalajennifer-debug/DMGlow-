@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,6 @@
 
 <style>
 
-/* ================= GLOBAL ================= */
 body{
   margin:0;
   font-family:'Segoe UI',sans-serif;
@@ -21,7 +20,7 @@ body{
 
 .app{
   width:100%;
-  max-width:650px;
+  max-width:680px;
   background:rgba(255,255,255,0.03);
   padding:35px;
   border-radius:22px;
@@ -31,32 +30,25 @@ body{
 h1{
   text-align:center;
   color:#D4AF37;
-  margin-bottom:30px;
+  margin-bottom:25px;
   font-weight:600;
 }
 
-/* TEXTAREA */
 textarea{
   width:100%;
-  min-height:140px;
+  min-height:160px;
   padding:18px;
   border-radius:18px;
-  border:1px solid rgba(212,175,55,0.3);
+  border:1px solid rgba(212,175,55,0.4);
   background:#14233a;
   color:white;
-  resize:none;
+  resize:vertical;
   margin-bottom:20px;
 }
 
-textarea:focus{
-  border:1px solid #D4AF37;
-  box-shadow:0 0 12px rgba(212,175,55,0.3);
-}
-
-/* BUTTONS */
 .generate-btn{
   width:100%;
-  padding:16px;
+  padding:15px;
   border-radius:18px;
   border:none;
   background:linear-gradient(135deg,#D4AF37,#C6A643);
@@ -66,33 +58,33 @@ textarea:focus{
   margin-bottom:15px;
 }
 
-.generate-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(212,175,55,0.4);
-}
-
-.mic-controls{
+.controls{
   display:flex;
   gap:10px;
   margin-bottom:20px;
 }
 
-.mic-controls button{
+.controls button{
   flex:1;
 }
 
-/* SELECT */
+.recording-indicator{
+  text-align:center;
+  margin-bottom:15px;
+  font-size:14px;
+  color:#D4AF37;
+}
+
 select{
   width:100%;
-  padding:15px;
+  padding:14px;
   border-radius:16px;
-  border:1px solid rgba(212,175,55,0.4);
   background:#14233a;
   color:white;
+  border:1px solid rgba(212,175,55,0.4);
   margin-bottom:20px;
 }
 
-/* ANALYSIS */
 .analysis-box{
   padding:16px;
   border-radius:16px;
@@ -102,11 +94,6 @@ select{
   font-size:14px;
 }
 
-/* RESULTS */
-.results{
-  margin-top:20px;
-}
-
 .reply-box{
   padding:18px;
   margin-bottom:15px;
@@ -114,11 +101,6 @@ select{
   background:#14233a;
   border:1px solid rgba(212,175,55,0.4);
   cursor:pointer;
-  transition:0.2s ease;
-}
-
-.reply-box:hover{
-  background:#1d3557;
 }
 
 .reply-box.selected{
@@ -126,7 +108,21 @@ select{
   box-shadow:0 0 16px rgba(212,175,55,0.5);
 }
 
-/* PREMIUM MODAL */
+.share-section{
+  margin-top:15px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.share-section button{
+  flex:1;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+}
+
 .premium-modal{
   display:none;
   position:fixed;
@@ -157,9 +153,8 @@ select{
 <div class="premium-modal" id="premiumModal">
   <div class="premium-content">
     <h2>Upgrade to DMGlow Premium</h2>
-    <p>Your 3-day trial has ended. Unlock unlimited intelligent replies.</p>
-    <button onclick="unlockPremium()" class="generate-btn">Upgrade Now</button>
-    <button onclick="closeModal()" style="background:none;color:white;border:none;">Maybe Later</button>
+    <p>Your 3-day trial has ended.</p>
+    <button onclick="unlockPremium()" class="generate-btn">Unlock Premium</button>
   </div>
 </div>
 
@@ -167,21 +162,21 @@ select{
 
 <h1>DMGlow Emotional Intelligence Engine</h1>
 
-<!-- 1 MESSAGE -->
 <textarea id="userInput" placeholder="Paste the message you received..."></textarea>
 
-<!-- 2 GENERATE -->
 <button class="generate-btn" onclick="generateReply()">
 Generate Intelligent Replies
 </button>
 
-<!-- 3 MICROPHONE -->
-<div class="mic-controls">
+<div class="controls">
   <button id="startMic" class="generate-btn">🎤 Start</button>
   <button id="stopMic" class="generate-btn">⛔ Stop</button>
 </div>
 
-<!-- 4 MODE -->
+<div class="recording-indicator" id="recordStatus">
+Microphone inactive
+</div>
+
 <select id="mode">
 <option value="magnetic">Magnetic Authority</option>
 <option value="strategic">Strategic High Value</option>
@@ -190,19 +185,23 @@ Generate Intelligent Replies
 <option value="business">Corporate / Business</option>
 </select>
 
-<!-- 5 ANALYSIS -->
 <div id="analysisBox" class="analysis-box">
-Your emotional calibration insights will appear here.
+Emotional insights will appear here.
 </div>
 
-<!-- 6 RESULTS -->
-<div class="results" id="outputArea"></div>
+<div id="outputArea"></div>
+
+<div class="share-section" id="shareSection" style="display:none;">
+  <button onclick="copyReply()">Copy</button>
+  <button onclick="downloadReply()">Download</button>
+  <button onclick="shareWhatsApp()">WhatsApp</button>
+  <button onclick="shareEmail()">Email</button>
+</div>
 
 </div>
 
 <script>
 
-/* ===== TRIAL ===== */
 const TRIAL_DAYS = 3;
 let trialStart = localStorage.getItem("DMGlowTrialStart");
 
@@ -215,7 +214,6 @@ const daysPassed = (Date.now() - trialStart)/(1000*60*60*24);
 let trialActive = daysPassed <= TRIAL_DAYS;
 let isPremium = localStorage.getItem("DMGlowPremium")==="true";
 
-/* ===== EMOTION ===== */
 function detectEmotion(text){
 text=text.toLowerCase();
 if(/love|happy|excited|beautiful|miss|amazing/.test(text)) return "Positive";
@@ -225,21 +223,14 @@ return "Neutral";
 }
 
 const replyBank={
-Positive:["Confidence attracts naturally.","Alignment builds attraction.","Clarity signals strength."],
-Vulnerable:["Composure strengthens position.","Reflection refines leverage.","Stability builds influence."],
-Heated:["Control outweighs reaction.","Precision preserves power.","Direction beats intensity."],
-Neutral:["There’s depth behind that.","I’m observing carefully.","Continue — I’m assessing."]
+Positive:["Your energy is noted — I respond with clarity and balance."],
+Vulnerable:["Emotional depth is acknowledged. Stability remains my position."],
+Heated:["Intensity detected. Control and precision guide my reply."],
+Neutral:["I observe. I respond with structure and composure."]
 };
 
-function applyMode(reply,mode){
-if(mode==="strategic") return reply+" Timing defines leverage.";
-if(mode==="balanced") return reply+" Power remains centered.";
-if(mode==="dating") return reply+" Emotional control deepens attraction.";
-if(mode==="business") return reply+" Execution outweighs emotion.";
-return reply;
-}
+let selectedReply="";
 
-/* ===== GENERATE ===== */
 function generateReply(){
 
 const input=document.getElementById("userInput").value.trim();
@@ -254,33 +245,51 @@ const emotion=detectEmotion(input);
 const mode=document.getElementById("mode").value;
 
 document.getElementById("analysisBox").innerHTML=
-"<strong>Detected Emotional Core:</strong> "+emotion+
-"<br><strong>Mode:</strong> "+mode;
+"<strong>Detected:</strong> "+emotion+" | <strong>Mode:</strong> "+mode;
 
-let pool=[...replyBank[emotion]];
-pool.sort(()=>Math.random()-0.5);
+let reply=replyBank[emotion][0];
 
-const limit=isPremium?3:2;
+if(mode==="strategic") reply+=" Timing defines leverage.";
+if(mode==="balanced") reply+=" Power remains centered.";
+if(mode==="dating") reply+=" Emotional control deepens attraction.";
+if(mode==="business") reply+=" Execution outweighs emotion.";
+
 const output=document.getElementById("outputArea");
 output.innerHTML="";
-
-pool.slice(0,limit).forEach(reply=>{
 let box=document.createElement("div");
 box.className="reply-box";
-box.textContent=applyMode(reply,mode);
-
+box.textContent=reply;
 box.onclick=function(){
 document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
 box.classList.add("selected");
+selectedReply=reply;
+document.getElementById("shareSection").style.display="flex";
 };
-
 output.appendChild(box);
-});
 }
 
-/* ===== SPEECH ===== */
-let recognition;
+function copyReply(){
+navigator.clipboard.writeText(selectedReply);
+alert("Copied");
+}
 
+function downloadReply(){
+const blob=new Blob([selectedReply],{type:"text/plain"});
+const link=document.createElement("a");
+link.href=URL.createObjectURL(blob);
+link.download="DMGlowReply.txt";
+link.click();
+}
+
+function shareWhatsApp(){
+window.open("https://wa.me/?text="+encodeURIComponent(selectedReply));
+}
+
+function shareEmail(){
+window.location.href="mailto:?subject=DMGlow Reply&body="+encodeURIComponent(selectedReply);
+}
+
+let recognition;
 if('webkitSpeechRecognition' in window){
 recognition=new webkitSpeechRecognition();
 recognition.continuous=true;
@@ -288,34 +297,27 @@ recognition.lang="en-US";
 
 document.getElementById("startMic").onclick=function(){
 recognition.start();
+document.getElementById("recordStatus").innerText="🎙 Recording...";
 };
 
 document.getElementById("stopMic").onclick=function(){
 recognition.stop();
+document.getElementById("recordStatus").innerText="Microphone stopped";
 };
 
 recognition.onresult=function(event){
-let transcript="";
-for(let i=event.resultIndex;i<event.results.length;i++){
-transcript+=event.results[i][0].transcript;
-}
-document.getElementById("userInput").value+=transcript+" ";
+document.getElementById("userInput").value=
+event.results[event.results.length-1][0].transcript;
 };
 }else{
-document.getElementById("startMic").disabled=true;
-document.getElementById("stopMic").disabled=true;
+document.getElementById("recordStatus").innerText="Speech not supported";
 }
 
-/* ===== PREMIUM ===== */
 function unlockPremium(){
 isPremium=true;
 localStorage.setItem("DMGlowPremium","true");
-closeModal();
-alert("Premium Activated");
-}
-
-function closeModal(){
 document.getElementById("premiumModal").style.display="none";
+alert("Premium Activated");
 }
 
 </script>
