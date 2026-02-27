@@ -93,10 +93,6 @@ h1{
   font-size:15px;
 }
 
-/* =========================
-   INPUT
-========================= */
-
 textarea{
   width:100%;
   min-height:180px;
@@ -116,10 +112,6 @@ textarea:focus{
   box-shadow:0 0 16px rgba(232,197,108,.35);
 }
 
-/* =========================
-   SELECTS
-========================= */
-
 select{
   width:100%;
   padding:15px;
@@ -129,10 +121,6 @@ select{
   border:1px solid rgba(232,197,108,.35);
   margin-bottom:14px;
 }
-
-/* =========================
-   OUTPUT CARDS
-========================= */
 
 .reply-box{
   padding:22px;
@@ -156,9 +144,20 @@ select{
   box-shadow:0 0 24px rgba(232,197,108,.55);
 }
 
-/* =========================
-   GENERATE BUTTON
-========================= */
+#shareButtons{
+  margin-top:20px;
+  opacity:.5;
+  transition:.3s;
+}
+
+#shareButtons.active{
+  opacity:1;
+}
+
+#shareHelper{
+  font-size:13px;
+  color:#F1D78A;
+}
 
 .generate-bottom{
   position:fixed;
@@ -216,6 +215,12 @@ select{
 <div class="section-title">3. Generated Replies</div>
 <div id="outputArea"></div>
 
+<div id="shareButtons">
+  <div id="shareHelper">
+    Select a reply to activate sharing.
+  </div>
+</div>
+
 </div>
 
 <div class="generate-bottom">
@@ -223,18 +228,14 @@ select{
 </div>
 
 <script>
-
-/* LOADER */
 window.addEventListener("load",()=>{
   setTimeout(()=>{
     document.getElementById("loader").classList.add("fade-out");
   },1200);
 });
-
-/* ENGINE SCRIPT WILL GO HERE */
-
 </script>
+
 <script src="script.js"></script>
-</body>
+
 </body>
 </html>
