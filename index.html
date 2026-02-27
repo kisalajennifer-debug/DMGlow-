@@ -14,7 +14,7 @@ body{
   color:#F5F7FA;
   display:flex;
   justify-content:center;
-  padding:25px 12px;
+  padding:25px 12px 120px 12px;
 }
 
 .app{
@@ -33,10 +33,12 @@ h1{
 }
 
 .section-title{
-  margin-top:25px;
+  margin-top:28px;
   margin-bottom:10px;
   font-weight:600;
   color:#D4AF37;
+  font-size:15px;
+  letter-spacing:0.5px;
 }
 
 textarea{
@@ -49,6 +51,7 @@ textarea{
   color:white;
   resize:vertical;
   margin-bottom:15px;
+  font-size:14px;
 }
 
 .controls{
@@ -67,6 +70,7 @@ textarea{
   border:none;
   cursor:pointer;
   font-weight:600;
+  transition:0.3s;
 }
 
 .primary{
@@ -74,9 +78,18 @@ textarea{
   color:#0B1C2D;
 }
 
+.primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(212,175,55,0.4);
+}
+
 .secondary{
   background:#1E2F4A;
   color:#D4AF37;
+}
+
+.secondary:hover{
+  background:#243a5a;
 }
 
 .recording-indicator{
@@ -84,6 +97,19 @@ textarea{
   margin-bottom:10px;
   font-size:14px;
   color:#D4AF37;
+  transition:0.3s;
+}
+
+.recording-active{
+  color:#ff4d4d;
+  font-weight:600;
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+  0%{opacity:1;}
+  50%{opacity:0.5;}
+  100%{opacity:1;}
 }
 
 audio{
@@ -98,6 +124,7 @@ select{
   background:#14233a;
   color:white;
   border:1px solid rgba(212,175,55,0.4);
+  font-size:14px;
 }
 
 .analysis-box{
@@ -119,14 +146,32 @@ select{
   transition:0.3s;
 }
 
+.reply-box:hover{
+  transform:translateY(-2px);
+}
+
 .reply-box.selected{
   border:2px solid #D4AF37;
   box-shadow:0 0 14px rgba(212,175,55,0.6);
 }
 
+.generate-bottom{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#0F243A;
+  padding:15px;
+  box-shadow:0 -5px 20px rgba(0,0,0,0.5);
+}
+
+.generate-bottom button{
+  width:100%;
+}
+
 .share-section{
-  margin-top:25px;
-  padding-top:15px;
+  margin-top:35px;
+  padding-top:20px;
   border-top:1px solid rgba(212,175,55,0.4);
 }
 
@@ -144,6 +189,12 @@ select{
   border:none;
   cursor:pointer;
   font-size:13px;
+  background:#1E2F4A;
+  color:#D4AF37;
+}
+
+.share-buttons button:hover{
+  background:#243a5a;
 }
 
 .disabled{
@@ -154,10 +205,6 @@ select{
 .helper{
   font-size:13px;
   color:#D4AF37;
-}
-
-.generate-bottom{
-  margin-top:25px;
 }
 
 </style>
@@ -198,10 +245,6 @@ Emotional insights will appear here.
 <div class="section-title">3. Generated Replies</div>
 <div id="outputArea"></div>
 
-<div class="generate-bottom">
-<button class="btn primary" onclick="generateReply()">Generate Intelligent Replies</button>
-</div>
-
 <div class="share-section">
 <div class="section-title">4. Share Your Selected Reply</div>
 <div id="shareHelper" class="helper">
@@ -221,7 +264,13 @@ Select a reply above to activate sharing.
 
 </div>
 
+<div class="generate-bottom">
+<button class="btn primary" onclick="generateReply()">Generate Intelligent Replies</button>
+</div>
+
 <script>
+
+/* REPLY ENGINE remains same */
 
 const replyBank={
 Positive:[
@@ -258,7 +307,6 @@ let selectedReply="";
 let recordedBlob=null;
 
 function generateReply(){
-
 const input=document.getElementById("userInput").value.trim();
 if(!input){ alert("Enter a message first."); return; }
 
@@ -299,7 +347,7 @@ output.appendChild(box);
 });
 }
 
-/* RECORDING */
+/* RECORDING — 15 MIN SAFE CAP */
 
 let mediaRecorder;
 let audioChunks=[];
@@ -312,16 +360,20 @@ const recordStatus=document.getElementById("recordStatus");
 const audioPlayback=document.getElementById("audioPlayback");
 
 recordBtn.onclick=async function(){
+
+if(mediaRecorder && mediaRecorder.state==="recording") return;
+
 const stream=await navigator.mediaDevices.getUserMedia({audio:true});
 mediaRecorder=new MediaRecorder(stream);
 audioChunks=[];
 mediaRecorder.start();
 
+recordStatus.classList.add("recording-active");
 seconds=0;
-recordStatus.innerText="🎙 Recording 00:00";
 
 timerInterval=setInterval(()=>{
 seconds++;
+if(seconds>=900){ mediaRecorder.stop(); }
 let mins=Math.floor(seconds/60);
 let secs=seconds%60;
 recordStatus.innerText=`🎙 Recording ${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
@@ -331,6 +383,7 @@ mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
 
 mediaRecorder.onstop=e=>{
 clearInterval(timerInterval);
+recordStatus.classList.remove("recording-active");
 recordStatus.innerText="Recording stopped";
 recordedBlob=new Blob(audioChunks,{type:"audio/webm"});
 audioPlayback.src=URL.createObjectURL(recordedBlob);
@@ -346,38 +399,7 @@ mediaRecorder.stop();
 
 /* SHARE */
 
-function copyReply(){
-navigator.clipboard.writeText(selectedReply);
-}
+function copyReply(){ navigator.clipboard.writeText(selectedReply); }
 
 function downloadReply(){
-const blob=new Blob([selectedReply],{type:"text/plain"});
-const link=document.createElement("a");
-link.href=URL.createObjectURL(blob);
-link.download="DMGlowReply.txt";
-link.click();
-}
-
-function shareWhatsApp(){
-window.open("https://wa.me/?text="+encodeURIComponent(selectedReply));
-}
-
-function shareFacebook(){
-window.open("https://www.facebook.com/sharer/sharer.php?u=&quote="+encodeURIComponent(selectedReply));
-}
-
-function shareX(){
-window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(selectedReply));
-}
-
-function shareLinkedIn(){
-window.open("https://www.linkedin.com/sharing/share-offsite/?url=&summary="+encodeURIComponent(selectedReply));
-}
-
-function shareEmail(){
-window.location.href="mailto:?subject=DMGlow Reply&body="+encodeURIComponent(selectedReply);
-}
-
-</script>
-</body>
-</html>
+const blob=new Blob([
