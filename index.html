@@ -289,17 +289,53 @@ function shareEmail(){
 window.location.href="mailto:?subject=DMGlow Reply&body="+encodeURIComponent(selectedReply);
 }
 
+/* ===== IMPROVED LONG RECORDING SYSTEM ===== */
+
 let recognition;
-if('webkitSpeechRecognition' in window){
-recognition=new webkitSpeechRecognition();
-recognition.continuous=true;
-recognition.lang="en-US";
+let isRecording = false;
 
-document.getElementById("startMic").onclick=function(){
-recognition.start();
-document.getElementById("recordStatus").innerText="🎙 Recording...";
-};
+if ('webkitSpeechRecognition' in window) {
 
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = "en-US";
+
+  const recordStatus = document.getElementById("recordStatus");
+  const textarea = document.getElementById("userInput");
+
+  document.getElementById("startMic").onclick = function () {
+    if (!isRecording) {
+      recognition.start();
+      isRecording = true;
+      recordStatus.innerText = "🔴 Recording... (Speak freely)";
+    }
+  };
+
+  document.getElementById("stopMic").onclick = function () {
+    recognition.stop();
+    isRecording = false;
+    recordStatus.innerText = "🟢 Recording stopped";
+  };
+
+  recognition.onresult = function (event) {
+    let transcript = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    textarea.value += transcript + " ";
+  };
+
+  recognition.onend = function () {
+    if (isRecording) {
+      recognition.start(); // auto restart for long sessions
+    }
+  };
+
+} else {
+  document.getElementById("recordStatus").innerText =
+    "Speech recognition not supported on this browser.";
+}
 document.getElementById("stopMic").onclick=function(){
 recognition.stop();
 document.getElementById("recordStatus").innerText="Microphone stopped";
