@@ -1,6 +1,5 @@
 /* ==================================================
-   DMGLOW CONNECT – MASTER ENGINE V7
-   Adaptive Personality Stack • Scalable • Premium
+   DMGLOW CONNECT – MASTER ENGINE V7 (STABLE)
 ================================================== */
 
 let selectedReply = "";
@@ -42,11 +41,10 @@ return premiumUnlocked ? "deep" : "medium";
 }
 
 /* =========================
-   TONE MATRIX (V7 STACK)
+   TONE MATRIX
 ========================= */
 
 const toneLayers = {
-
 smooth: "Balance keeps everything steady.",
 dominant: "Standards quietly hold the frame.",
 psychological: "Energy reveals more than words.",
@@ -176,7 +174,7 @@ return matches;
 }
 
 /* =========================
-   SMART PICK (ANTI-REPEAT)
+   SMART PICK
 ========================= */
 
 function smartPick(array,type){
@@ -227,7 +225,7 @@ finalReply+="\n"+enhancer;
 
 finalReply+="\n"+ending;
 
-/* Adaptive Personality Injection */
+/* Tone Injection */
 
 finalReply+="\n"+toneLayers.smooth;
 
@@ -239,12 +237,11 @@ let box=document.createElement("div");
 box.className="reply-box";
 box.textContent=finalReply;
 
+/* SAFE CLICK HANDLER */
 box.onclick=function(){
 document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
 box.classList.add("selected");
 selectedReply=finalReply;
-document.getElementById("shareButtons").classList.remove("disabled");
-document.getElementById("shareHelper").innerText="Ready to share your selected response.";
 };
 
 output.appendChild(box);
