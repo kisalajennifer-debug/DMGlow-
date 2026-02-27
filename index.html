@@ -29,8 +29,6 @@ body{
   box-shadow:0 20px 40px rgba(0,0,0,0.4);
 }
 
-/* ================= TITLE ================= */
-
 h1{
   text-align:center;
   color:#D4AF37;
@@ -38,7 +36,55 @@ h1{
   font-weight:600;
 }
 
-/* ================= SELECT ================= */
+/* TEXTAREA (TOP) */
+
+textarea{
+  width:100%;
+  min-height:140px;
+  padding:18px;
+  border-radius:18px;
+  border:1px solid rgba(212,175,55,0.3);
+  background:#14233a;
+  color:white;
+  resize:none;
+  margin-bottom:20px;
+}
+
+textarea:focus{
+  border:1px solid #D4AF37;
+  box-shadow:0 0 12px rgba(212,175,55,0.3);
+}
+
+/* BUTTONS */
+
+.generate-btn{
+  width:100%;
+  padding:16px;
+  border-radius:18px;
+  border:none;
+  background:linear-gradient(135deg,#D4AF37,#C6A643);
+  color:#0B1C2D;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:15px;
+}
+
+.generate-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(212,175,55,0.4);
+}
+
+.mic-controls{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.mic-controls button{
+  flex:1;
+}
+
+/* MODE SELECT */
 
 select{
   width:100%;
@@ -50,7 +96,7 @@ select{
   margin-bottom:20px;
 }
 
-/* ================= ANALYSIS ================= */
+/* ANALYSIS */
 
 .analysis-box{
   padding:16px;
@@ -61,48 +107,10 @@ select{
   font-size:14px;
 }
 
-/* ================= TEXTAREA ================= */
-
-textarea{
-  width:100%;
-  min-height:140px;
-  padding:18px;
-  border-radius:18px;
-  border:1px solid rgba(212,175,55,0.3);
-  background:#14233a;
-  color:white;
-  resize:none;
-  margin-bottom:15px;
-}
-
-textarea:focus{
-  border:1px solid #D4AF37;
-  box-shadow:0 0 12px rgba(212,175,55,0.3);
-}
-
-/* ================= BUTTONS ================= */
-
-.generate-btn{
-  width:100%;
-  padding:16px;
-  border-radius:18px;
-  border:none;
-  background:linear-gradient(135deg,#D4AF37,#C6A643);
-  color:#0B1C2D;
-  font-weight:600;
-  cursor:pointer;
-  margin-top:12px;
-}
-
-.generate-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 8px 20px rgba(212,175,55,0.4);
-}
-
-/* ================= REPLIES ================= */
+/* REPLIES */
 
 .results{
-  margin-top:30px;
+  margin-top:20px;
 }
 
 .reply-box{
@@ -114,16 +122,12 @@ textarea:focus{
   cursor:pointer;
 }
 
-.reply-box:hover{
-  background:#1d3557;
-}
-
 .reply-box.selected{
   border:2px solid #D4AF37;
   box-shadow:0 0 16px rgba(212,175,55,0.5);
 }
 
-/* ================= PREMIUM MODAL ================= */
+/* PREMIUM MODAL */
 
 .premium-modal{
   display:none;
@@ -155,9 +159,8 @@ textarea:focus{
 <div class="premium-modal" id="premiumModal">
   <div class="premium-content">
     <h2>Upgrade to DMGlow Premium</h2>
-    <p>Unlock unlimited calibrated replies and deeper emotional mapping.</p>
+    <p>Your 3-day trial has ended. Unlock unlimited intelligent replies.</p>
     <button onclick="unlockPremium()" class="generate-btn">Upgrade Now</button>
-    <br><br>
     <button onclick="closeModal()" style="background:none;color:white;border:none;">Maybe Later</button>
   </div>
 </div>
@@ -166,6 +169,21 @@ textarea:focus{
 
 <h1>DMGlow Emotional Intelligence Engine</h1>
 
+<!-- 1️⃣ MESSAGE BOX -->
+<textarea id="userInput" placeholder="Paste the message you received..."></textarea>
+
+<!-- 2️⃣ GENERATE -->
+<button class="generate-btn" onclick="generateReply()">
+Generate Intelligent Replies
+</button>
+
+<!-- 3️⃣ MICROPHONE -->
+<div class="mic-controls">
+  <button id="startMic" class="generate-btn">🎤 Start</button>
+  <button id="stopMic" class="generate-btn">⛔ Stop</button>
+</div>
+
+<!-- 4️⃣ TONE SELECT -->
 <select id="mode">
 <option value="magnetic">Magnetic Authority</option>
 <option value="strategic">Strategic High Value</option>
@@ -174,25 +192,19 @@ textarea:focus{
 <option value="business">Corporate / Business</option>
 </select>
 
+<!-- 5️⃣ ANALYSIS -->
 <div id="analysisBox" class="analysis-box">
 Your emotional calibration insights will appear here.
 </div>
 
-<textarea id="userInput" placeholder="Paste the message or use voice input..."></textarea>
-
-<button id="micBtn" class="generate-btn">🎤 Tap to Speak</button>
-
-<button class="generate-btn" onclick="generateReply()">
-Generate Intelligent Replies
-</button>
-
+<!-- 6️⃣ RESULTS -->
 <div class="results" id="outputArea"></div>
 
 </div>
 
 <script>
 
-/* ================= TRIAL SYSTEM ================= */
+/* ===== TRIAL SYSTEM ===== */
 
 const TRIAL_DAYS = 3;
 let trialStart = localStorage.getItem("DMGlowTrialStart");
@@ -206,7 +218,7 @@ const daysPassed = (Date.now() - trialStart)/(1000*60*60*24);
 let trialActive = daysPassed <= TRIAL_DAYS;
 let isPremium = localStorage.getItem("DMGlowPremium")==="true";
 
-/* ================= EMOTION DETECTION ================= */
+/* ===== EMOTION DETECTION ===== */
 
 function detectEmotion(text){
 text=text.toLowerCase();
@@ -216,11 +228,9 @@ if(/angry|hate|annoyed|frustrated|upset/.test(text)) return "Heated";
 return "Neutral";
 }
 
-/* ================= REPLY BANK ================= */
-
 const replyBank={
-Positive:["Confidence should be intentional.","Alignment creates attraction.","Clarity signals strength."],
-Vulnerable:["Composure strengthens authority.","Reflection refines leverage.","Stability builds influence."],
+Positive:["Confidence attracts naturally.","Alignment builds attraction.","Clarity signals strength."],
+Vulnerable:["Composure strengthens position.","Reflection refines leverage.","Stability builds influence."],
 Heated:["Control outweighs reaction.","Precision preserves power.","Direction beats intensity."],
 Neutral:["There’s depth behind that.","I’m observing carefully.","Continue — I’m assessing."]
 };
@@ -233,66 +243,72 @@ if(mode==="business") return reply+" Execution outweighs emotion.";
 return reply;
 }
 
-/* ================= GENERATOR ================= */
+/* ===== GENERATE ===== */
 
-  async function generateReply() {
+function generateReply(){
 
-  const input = document.getElementById("userInput").value.trim();
-  const mode = document.getElementById("mode").value;
+const input=document.getElementById("userInput").value.trim();
+if(!input){ alert("Enter a message first."); return; }
 
-  if (!input) {
-    alert("Enter a message first.");
-    return;
-  }
-
-  const response = await fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: input,
-      mode: mode
-    })
-  });
-
-  const data = await response.json();
-
-  document.getElementById("outputArea").innerHTML =
-    `<div class="reply-box">${data.reply}</div>`;
+if(!isPremium && !trialActive){
+document.getElementById("premiumModal").style.display="flex";
+return;
 }
 
+const emotion=detectEmotion(input);
+const mode=document.getElementById("mode").value;
 
-/* ================= SPEECH TO TEXT ================= */
+document.getElementById("analysisBox").innerHTML=
+"<strong>Detected Emotional Core:</strong> "+emotion+
+"<br><strong>Mode:</strong> "+mode;
 
-const micBtn=document.getElementById("micBtn");
-const userInput=document.getElementById("userInput");
+let pool=[...replyBank[emotion]];
+pool.sort(()=>0.5-Math.random());
+
+const limit=isPremium?3:2;
+
+const output=document.getElementById("outputArea");
+output.innerHTML="";
+
+pool.slice(0,limit).forEach(reply=>{
+let box=document.createElement("div");
+box.className="reply-box";
+box.textContent=applyMode(reply,mode);
+box.onclick=function(){
+document.querySelectorAll(".reply-box").forEach(b=>b.classList.remove("selected"));
+box.classList.add("selected");
+};
+output.appendChild(box);
+});
+}
+
+/* ===== SPEECH ===== */
+
+let recognition;
 
 if('webkitSpeechRecognition' in window){
-const recognition=new webkitSpeechRecognition();
-recognition.continuous=false;
-recognition.interimResults=false;
+recognition=new webkitSpeechRecognition();
+recognition.continuous=true;
 recognition.lang="en-US";
 
-micBtn.onclick=function(){
+document.getElementById("startMic").onclick=function(){
 recognition.start();
-micBtn.textContent="Listening...";
+};
+
+document.getElementById("stopMic").onclick=function(){
+recognition.stop();
 };
 
 recognition.onresult=function(event){
-userInput.value=event.results[0][0].transcript;
+document.getElementById("userInput").value=
+event.results[event.results.length-1][0].transcript;
 };
-
-recognition.onend=function(){
-micBtn.textContent="🎤 Tap to Speak";
-};
-}
-else{
-micBtn.disabled=true;
-micBtn.textContent="Speech Not Supported";
+}else{
+document.getElementById("startMic").disabled=true;
+document.getElementById("stopMic").disabled=true;
 }
 
-/* ================= PREMIUM ================= */
+/* ===== PREMIUM ===== */
 
 function unlockPremium(){
 isPremium=true;
