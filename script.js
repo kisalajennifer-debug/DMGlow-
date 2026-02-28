@@ -30,31 +30,33 @@ async function generateReply() {
       return;
     }
 
-    const replyText = data.replies[0]; // SINGLE premium reply
+    // LOOP THROUGH ALL 5 REPLIES
+    data.replies.forEach(replyText => {
 
-    const card = document.createElement("div");
-    card.className = "reply-box";
+      const card = document.createElement("div");
+      card.className = "reply-box";
 
-    const replyContent = document.createElement("div");
-    replyContent.className = "reply-text";
-    replyContent.textContent = replyText;
+      const replyContent = document.createElement("div");
+      replyContent.className = "reply-text";
+      replyContent.textContent = replyText;
 
-    const toneContainer = document.createElement("div");
-    toneContainer.className = "tone-container";
+      const toneContainer = document.createElement("div");
+      toneContainer.className = "tone-container";
 
-    const detectedTones = detectToneLayers(replyText);
+      const detectedTones = detectToneLayers(replyText);
 
-    detectedTones.forEach(tone => {
-      const badge = document.createElement("div");
-      badge.className = "tone-badge";
-      badge.textContent = tone;
-      toneContainer.appendChild(badge);
+      detectedTones.forEach(tone => {
+        const badge = document.createElement("span");
+        badge.className = "tone-badge";
+        badge.textContent = tone;
+        toneContainer.appendChild(badge);
+      });
+
+      card.appendChild(replyContent);
+      card.appendChild(toneContainer);
+
+      output.appendChild(card);
     });
-
-    card.appendChild(replyContent);
-    card.appendChild(toneContainer);
-
-    output.appendChild(card);
 
   } catch (err) {
     output.innerHTML = "Error generating reply.";
@@ -62,7 +64,9 @@ async function generateReply() {
   }
 }
 
-/* Simple Tone Analyzer */
+
+/* ========= CLEAN TONE ANALYZER ========= */
+
 function detectToneLayers(text) {
 
   const tones = [];
@@ -83,4 +87,4 @@ function detectToneLayers(text) {
     tones.push("Balanced");
 
   return tones;
-}
+  }
