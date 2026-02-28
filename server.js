@@ -1,71 +1,112 @@
-import express from "express";
-import cors from "cors";
-import OpenAI from "openai";
+async function generateReply() {
 
-const app = express();
+  const message = document.getElementById("userInput").value.trim();
+  const intensity = document.getElementById("intensity").value;
+  const output = document.getElementById("outputArea");
 
-app.use(cors());
-app.use(express.json());
+  if (!message) {
+    alert("Enter a message first.");
+    return;
+  }
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+  output.innerHTML = "Generating...";
 
-/* ===============================
-   PREMIUM GENERATE ROUTE
-================================ */
-
-app.post("/api/generate", async (req, res) => {
   try {
-    const { message, intensity } = req.body;
 
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
-
-    const prompt = `
-You are DMGlow Elite Reply Engine.
-
-User intensity level: ${intensity}
-
-Generate EXACTLY 5 powerful, emotionally intelligent replies.
-
-STRICT RULES:
-- Only output the replies.
-- No explanations.
-- No analysis.
-- No labels.
-- No introductions.
-- No tone headings.
-- Each reply must be 1–3 sentences.
-- Separate each reply ONLY using this symbol: |||
-- Do NOT include the separator anywhere else.
-
-Message:
-"${message}"
-`;
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.9
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message, intensity })
     });
 
-    const rawText = completion.choices[0].message.content.trim();
+    const data = await response.json();
 
-    const replies = rawText
-      .split("|||")
-      .map(r => r.trim())
-      .filter(r => r.length > 0);
+    output.innerHTML = "";
 
-    res.json({ replies });
+    if (!data.replies || data.replies.length === 0) {
+      output.innerHTML = "No replies generated.";
+      return;
+    }
 
-  } catch (error) {
-    console.error("Server Error:", error);
-    res.status(500).json({ error: "Something went wrong" });
+    /* MAIN REPLY CARD */
+
+    const mainReplyCard = document.createElement("div");
+    mainReplyCard.className = "main-reply-card";
+    mainReplyCard.textContent = data.replies[0];
+
+    output.appendChild(mainReplyCard);
+
+    /* TONE CARDS */
+
+    const tones = detectTones(data.replies[0]);
+
+    tones.forEach(tone => {
+
+      const toneCard = document.createElement("div");
+      toneCard.className = "tone-card";
+
+      const toneTitle = document.createElement("div");
+      toneTitle.className = "tone-title";
+      toneTitle.textContent = "Tone: " + tone.label;
+
+      const toneText = document.createElement("div");
+      toneText.className = "tone-text";
+      toneText.textContent = tone.description;
+
+      toneCard.appendChild(toneTitle);
+      toneCard.appendChild(toneText);
+
+      output.appendChild(toneCard);
+    });
+
+  } catch (err) {
+    output.innerHTML = "Error generating reply.";
+    console.error(err);
   }
-});
+}
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
-});
+
+function detectTones(text) {
+
+  const lower = text.toLowerCase();
+  const tones = [];
+
+  if (/calm|understand|steady/.test(lower)) {
+    tones.push({
+      label: "Soft",
+      description: "This response maintains calm emotional energy and shows understanding."
+    });
+  }
+
+  if (/balance|composed|clear/.test(lower)) {
+    tones.push({
+      label: "Balanced",
+      description: "This reply keeps emotional control while staying grounded and rational."
+    });
+  }
+
+  if (/position|standard|respect/.test(lower)) {
+    tones.push({
+      label: "Elite",
+      description: "This tone communicates value, standards, and quiet authority."
+    });
+  }
+
+  if (/control|dominant|lead|frame/.test(lower)) {
+    tones.push({
+      label: "Controlled",
+      description: "This response maintains frame control and structured leadership energy."
+    });
+  }
+
+  if (tones.length === 0) {
+    tones.push({
+      label: "Adaptive",
+      description: "This reply adapts smoothly based on conversational context."
+    });
+  }
+
+  return tones;
+}
