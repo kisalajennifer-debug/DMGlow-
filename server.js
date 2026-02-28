@@ -1,24 +1,32 @@
-import express from "express";
-import cors from "cors";
-import OpenAI from "openai";
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 app.post("/generate", async (req, res) => {
   try {
     const { message, mode } = req.body;
 
     const prompt = `
 You are DMGlow Emotional Intelligence Engine.
+
 Tone mode: ${mode}
 
-Analyze emotional intent and generate 3 calibrated high-value replies.
+Generate 5 COMPLETELY DIFFERENT high-value responses.
+Each reply must:
+- Have different structure
+- Use different emotional framing
+- Use different sentence rhythm
+- Avoid repeating phrases
+- Avoid similar openings
+
+Return them clearly formatted as:
+
+REPLY 1:
+...
+REPLY 2:
+...
+REPLY 3:
+...
+REPLY 4:
+...
+REPLY 5:
+...
 
 Message:
 "${message}"
@@ -27,17 +35,23 @@ Message:
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7
+      temperature: 0.95
     });
 
-    res.json({ reply: completion.choices[0].message.content });
+    const fullText = completion.choices[0].message.content;
+
+    const replies = fullText.split(/REPLY \d:/).filter(Boolean);
+
+    res.json({
+      reply1: replies[0]?.trim() || "",
+      reply2: replies[1]?.trim() || "",
+      reply3: replies[2]?.trim() || "",
+      reply4: replies[3]?.trim() || "",
+      reply5: replies[4]?.trim() || ""
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong" });
   }
-});
-
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
 });
