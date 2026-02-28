@@ -13,23 +13,28 @@ async function generateReply() {
 
   try {
 
-    const response = await fetch("/api/generate", {
+    const response = await fetch("/generate", {   // ✅ FIXED endpoint
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message, intensity })
+      body: JSON.stringify({ message, mode: intensity }) // ✅ FIXED key name
     });
 
     const data = await response.json();
 
     output.innerHTML = "";
 
-    data.replies.forEach(reply => {
+    // Split AI text into separate replies (by line breaks)
+    const replies = data.reply
+      .split("\n")
+      .filter(r => r.trim() !== "");
+
+    replies.forEach(reply => {
 
       const box = document.createElement("div");
       box.className = "reply-box";
-      box.textContent = reply;
+      box.textContent = reply.trim();
 
       output.appendChild(box);
     });
