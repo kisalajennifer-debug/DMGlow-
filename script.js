@@ -30,32 +30,43 @@ async function generateReply() {
       return;
     }
 
-    // LOOP THROUGH ALL 5 REPLIES
-    data.replies.forEach(replyText => {
+    const mainReply = data.replies[0];
 
-      const card = document.createElement("div");
-      card.className = "reply-box";
+    /* ===== MAIN REPLY CARD ===== */
 
-      const replyContent = document.createElement("div");
-      replyContent.className = "reply-text";
-      replyContent.textContent = replyText;
+    const mainCard = document.createElement("div");
+    mainCard.className = "main-reply-card";
+    mainCard.textContent = mainReply;
 
-      const toneContainer = document.createElement("div");
-      toneContainer.className = "tone-container";
+    output.appendChild(mainCard);
 
-      const detectedTones = detectToneLayers(replyText);
+    /* ===== TONE VARIATIONS ===== */
 
-      detectedTones.forEach(tone => {
-        const badge = document.createElement("span");
-        badge.className = "tone-badge";
-        badge.textContent = tone;
-        toneContainer.appendChild(badge);
-      });
+    const toneLabels = [
+      "Soft",
+      "Balanced",
+      "Elevated",
+      "Dominant",
+      "Elite Controlled"
+    ];
 
-      card.appendChild(replyContent);
-      card.appendChild(toneContainer);
+    toneLabels.forEach(label => {
 
-      output.appendChild(card);
+      const toneCard = document.createElement("div");
+      toneCard.className = "tone-card";
+
+      const toneTitle = document.createElement("div");
+      toneTitle.className = "tone-title";
+      toneTitle.textContent = label;
+
+      const toneText = document.createElement("div");
+      toneText.className = "tone-text";
+      toneText.textContent = generateToneVariation(mainReply, label);
+
+      toneCard.appendChild(toneTitle);
+      toneCard.appendChild(toneText);
+
+      output.appendChild(toneCard);
     });
 
   } catch (err) {
@@ -65,26 +76,28 @@ async function generateReply() {
 }
 
 
-/* ========= CLEAN TONE ANALYZER ========= */
+/* SIMPLE FRONT-END TONE REWRITER */
 
-function detectToneLayers(text) {
+function generateToneVariation(text, tone) {
 
-  const tones = [];
+  switch (tone) {
 
-  if (/emotion|feel|heart|energy|connection/i.test(text))
-    tones.push("Psychological");
+    case "Soft":
+      return "Gently expressed: " + text;
 
-  if (/standard|position|frame|control|dominant/i.test(text))
-    tones.push("Dominant");
+    case "Balanced":
+      return "Calm and composed: " + text;
 
-  if (/plan|future|direction|next|strategy/i.test(text))
-    tones.push("Strategic");
+    case "Elevated":
+      return "Refined perspective: " + text;
 
-  if (/calm|steady|balanced|respect/i.test(text))
-    tones.push("Smooth");
+    case "Dominant":
+      return "Direct and firm: " + text;
 
-  if (tones.length === 0)
-    tones.push("Balanced");
+    case "Elite Controlled":
+      return "Strategic and controlled: " + text;
 
-  return tones;
+    default:
+      return text;
   }
+}
