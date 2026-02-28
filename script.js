@@ -63,43 +63,37 @@ function generateReply(){
       ? autoDetectTone(message)
       : mapIntensity(intensity);
 
-  const replyPool = toneDatabase[detectedTone];
-
-  let randomReply = replyPool[Math.floor(Math.random()*replyPool.length)];
-
-  // Prevent repetition
-  while(usedReplies.has(randomReply)){
-    randomReply = replyPool[Math.floor(Math.random()*replyPool.length)];
-  }
-
-  usedReplies.add(randomReply);
-
-  // MAIN REPLY CARD
-  const mainCard = document.createElement("div");
-  mainCard.className = "main-reply-card";
-  mainCard.textContent = randomReply;
-
-  output.appendChild(mainCard);
-
-  // TONE CARDS
+  // Generate ONE reply per tone — clean structure
   Object.keys(toneDatabase).forEach(tone => {
 
+    let replyPool = toneDatabase[tone];
+    let randomReply = replyPool[Math.floor(Math.random()*replyPool.length)];
+
+    // Prevent repetition globally
+    let attempts = 0;
+    while(usedReplies.has(randomReply) && attempts < 10){
+      randomReply = replyPool[Math.floor(Math.random()*replyPool.length)];
+      attempts++;
+    }
+
+    usedReplies.add(randomReply);
+
     const toneCard = document.createElement("div");
-    toneCard.className = "tone-card";
+    toneCard.className = "single-tone-card";
 
     const toneTitle = document.createElement("div");
-    toneTitle.className = "tone-title";
-    toneTitle.textContent = tone.toUpperCase() + " TONE";
+    toneTitle.className = "single-tone-title";
+    toneTitle.textContent = tone.toUpperCase();
 
     const toneText = document.createElement("div");
-    toneText.className = "tone-text";
-    toneText.textContent =
-      toneDatabase[tone][Math.floor(Math.random()*toneDatabase[tone].length)];
+    toneText.className = "single-tone-text";
+    toneText.textContent = randomReply;
 
     toneCard.appendChild(toneTitle);
     toneCard.appendChild(toneText);
 
     output.appendChild(toneCard);
+
   });
 
 }
@@ -113,4 +107,4 @@ function mapIntensity(level){
     case "5": return "elite";
     default: return "balanced";
   }
-    }
+}
