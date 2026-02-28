@@ -11,7 +11,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-app.post("/generate", async (req, res) => {
+/* ===============================
+   PREMIUM GENERATE ROUTE
+================================ */
+
+app.post("/api/generate", async (req, res) => {
   try {
     const { message, intensity } = req.body;
 
@@ -20,22 +24,22 @@ app.post("/generate", async (req, res) => {
     }
 
     const prompt = `
-You are DMGlow Emotional Intelligence Engine.
+You are DMGlow Elite Reply Engine.
 
-User selected intensity: ${intensity}
+User intensity level: ${intensity}
 
-STEP 1:
-Analyze emotional intent of the message.
-
-STEP 2:
-Generate EXACTLY 5 completely different emotional responses.
+Generate EXACTLY 5 powerful, emotionally intelligent replies.
 
 STRICT RULES:
-- Each reply must feel unique.
-- Do NOT repeat structure.
-- Do NOT repeat emotional framing.
-- Each reply 1–3 sentences.
-- Separate each reply using ONLY this symbol: |||
+- Only output the replies.
+- No explanations.
+- No analysis.
+- No labels.
+- No introductions.
+- No tone headings.
+- Each reply must be 1–3 sentences.
+- Separate each reply ONLY using this symbol: |||
+- Do NOT include the separator anywhere else.
 
 Message:
 "${message}"
@@ -44,10 +48,10 @@ Message:
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.95
+      temperature: 0.9
     });
 
-    const rawText = completion.choices[0].message.content;
+    const rawText = completion.choices[0].message.content.trim();
 
     const replies = rawText
       .split("|||")
