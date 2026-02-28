@@ -1,10 +1,10 @@
 async function generateReply() {
 
-  const message = document.getElementById("userInput").value;
+  const message = document.getElementById("userInput").value.trim();
   const intensity = document.getElementById("intensity").value;
   const output = document.getElementById("outputArea");
 
-  if (!message.trim()) {
+  if (!message) {
     alert("Enter a message first.");
     return;
   }
@@ -13,34 +13,74 @@ async function generateReply() {
 
   try {
 
-    const response = await fetch("/generate", {   // ✅ FIXED endpoint
+    const response = await fetch("/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message, mode: intensity }) // ✅ FIXED key name
+      body: JSON.stringify({ message, intensity })
     });
 
     const data = await response.json();
 
     output.innerHTML = "";
 
-    // Split AI text into separate replies (by line breaks)
-    const replies = data.reply
-      .split("\n")
-      .filter(r => r.trim() !== "");
+    if (!data.replies || data.replies.length === 0) {
+      output.innerHTML = "No reply generated.";
+      return;
+    }
 
-    replies.forEach(reply => {
+    const replyText = data.replies[0]; // SINGLE premium reply
 
-      const box = document.createElement("div");
-      box.className = "reply-box";
-      box.textContent = reply.trim();
+    const card = document.createElement("div");
+    card.className = "reply-box";
 
-      output.appendChild(box);
+    const replyContent = document.createElement("div");
+    replyContent.className = "reply-text";
+    replyContent.textContent = replyText;
+
+    const toneContainer = document.createElement("div");
+    toneContainer.className = "tone-container";
+
+    const detectedTones = detectToneLayers(replyText);
+
+    detectedTones.forEach(tone => {
+      const badge = document.createElement("div");
+      badge.className = "tone-badge";
+      badge.textContent = tone;
+      toneContainer.appendChild(badge);
     });
+
+    card.appendChild(replyContent);
+    card.appendChild(toneContainer);
+
+    output.appendChild(card);
 
   } catch (err) {
     output.innerHTML = "Error generating reply.";
     console.error(err);
   }
+}
+
+/* Simple Tone Analyzer */
+function detectToneLayers(text) {
+
+  const tones = [];
+
+  if (/emotion|feel|heart|energy|connection/i.test(text))
+    tones.push("Psychological");
+
+  if (/standard|position|frame|control|dominant/i.test(text))
+    tones.push("Dominant");
+
+  if (/plan|future|direction|next|strategy/i.test(text))
+    tones.push("Strategic");
+
+  if (/calm|steady|balanced|respect/i.test(text))
+    tones.push("Smooth");
+
+  if (tones.length === 0)
+    tones.push("Balanced");
+
+  return tones;
 }
