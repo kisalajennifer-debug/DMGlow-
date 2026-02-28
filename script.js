@@ -1,110 +1,125 @@
-let usedReplies = new Set();
-
-const toneDatabase = {
-
-  soft: [
-    "That sounds meaningful. I’d love to hear more about how it unfolded.",
-    "I appreciate you sharing that. How are you feeling about it now?",
-    "That carries energy. What stood out the most for you?"
-  ],
-
-  balanced: [
-    "Interesting. What was the outcome?",
-    "Alright — how did it go overall?",
-    "Good. What feedback did you receive?"
-  ],
-
-  elevated: [
-    "That’s progress. What impact did it create?",
-    "Now that it's out, what’s the next move?",
-    "Momentum matters — how was the reception?"
-  ],
-
-  dominant: [
-    "Results matter. What was delivered?",
-    "Did it meet the expected standard?",
-    "Give me the outcome directly."
-  ],
-
-  elite: [
-    "Execution reveals discipline. How did it perform?",
-    "I’m focused on results. What changed after it launched?",
-    "Was it aligned with your original objective?"
-  ]
-
-};
-
-function autoDetectTone(message){
-
-  const lower = message.toLowerCase();
-
-  if (/love|feel|heart|excited|happy|sad/.test(lower)) return "soft";
-  if (/project|school|work|meeting/.test(lower)) return "balanced";
-  if (/launch|release|big|major/.test(lower)) return "elevated";
-  if (/problem|issue|delay|mistake/.test(lower)) return "dominant";
-
-  return "elite";
-}
-
-function generateReply(){
+async function generateReply() {
 
   const message = document.getElementById("userInput").value.trim();
   const intensity = document.getElementById("intensity").value;
   const output = document.getElementById("outputArea");
 
-  if(!message){
+  if (!message) {
     alert("Enter a message first.");
     return;
   }
 
-  output.innerHTML = "";
+  output.innerHTML = "Generating...";
 
-  let detectedTone = intensity === "auto"
-      ? autoDetectTone(message)
-      : mapIntensity(intensity);
+  try {
 
-  // Generate ONE reply per tone — clean structure
-  Object.keys(toneDatabase).forEach(tone => {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message, intensity })
+    });
 
-    let replyPool = toneDatabase[tone];
-    let randomReply = replyPool[Math.floor(Math.random()*replyPool.length)];
+    const data = await response.json();
+    output.innerHTML = "";
 
-    // Prevent repetition globally
-    let attempts = 0;
-    while(usedReplies.has(randomReply) && attempts < 10){
-      randomReply = replyPool[Math.floor(Math.random()*replyPool.length)];
-      attempts++;
+    if (!data.replies || data.replies.length === 0) {
+      output.innerHTML = "No replies generated.";
+      return;
     }
 
-    usedReplies.add(randomReply);
+    const replyText = data.replies[0];
 
-    const toneCard = document.createElement("div");
-    toneCard.className = "single-tone-card";
+    /* =============================
+       COMPACT PREMIUM CARD
+    ============================== */
 
-    const toneTitle = document.createElement("div");
-    toneTitle.className = "single-tone-title";
-    toneTitle.textContent = tone.toUpperCase();
+    const card = document.createElement("div");
+    card.className = "compact-reply-card";
 
-    const toneText = document.createElement("div");
-    toneText.className = "single-tone-text";
-    toneText.textContent = randomReply;
+    // Main reply
+    const mainReply = document.createElement("div");
+    mainReply.style.marginBottom = "16px";
+    mainReply.style.lineHeight = "1.6";
+    mainReply.textContent = replyText;
 
-    toneCard.appendChild(toneTitle);
-    toneCard.appendChild(toneText);
+    card.appendChild(mainReply);
 
-    output.appendChild(toneCard);
+    // Tone detection
+    const tones = detectTones(replyText);
 
-  });
+    tones.forEach(tone => {
 
+      const row = document.createElement("div");
+      row.className = "tone-row";
+
+      const name = document.createElement("div");
+      name.className = "tone-name";
+      name.textContent = tone.label;
+
+      const line = document.createElement("div");
+      line.className = "tone-line";
+      line.textContent = tone.description;
+
+      row.appendChild(name);
+      row.appendChild(line);
+
+      card.appendChild(row);
+    });
+
+    output.appendChild(card);
+
+  } catch (err) {
+    output.innerHTML = "Error generating reply.";
+    console.error(err);
+  }
 }
 
-function mapIntensity(level){
-  switch(level){
-    case "1": return "soft";
-    case "2": return "balanced";
-    case "3": return "elevated";
-    case "4": return "dominant";
-    case "5": return "elite";
-    default: return "balanced";
+
+/* =========================
+   PREMIUM TONE STRUCTURE
+========================= */
+
+function detectTones(text) {
+
+  const lower = text.toLowerCase();
+  const tones = [];
+
+  if (/calm|understand|steady/.test(lower)) {
+    tones.push({
+      label: "Soft",
+      description: "Maintains calm emotional energy and shows understanding."
+    });
   }
+
+  if (/balance|composed|clear/.test(lower)) {
+    tones.push({
+      label: "Balanced",
+      description: "Emotionally grounded while staying rational and controlled."
+    });
+  }
+
+  if (/position|standard|respect/.test(lower)) {
+    tones.push({
+      label: "Elite",
+      description: "Communicates value, standards, and quiet authority."
+    });
+  }
+
+  if (/control|dominant|lead|frame/.test(lower)) {
+    tones.push({
+      label: "Controlled",
+      description: "Maintains frame control and structured leadership energy."
+    });
+  }
+
+  if (tones.length === 0) {
+    tones.push({
+      label: "Adaptive",
+      description: "Adapts smoothly based on conversational context."
+    });
+  }
+
+  return tones;
 }
