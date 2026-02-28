@@ -22,16 +22,20 @@ app.post("/generate", async (req, res) => {
     const prompt = `
 You are DMGlow Emotional Intelligence Engine.
 
-Tone intensity level: ${intensity}
+User selected intensity: ${intensity}
 
-Generate 5 emotionally adaptive replies.
-Each reply must:
-- Be different from the others
-- Use varied structure
-- Match the tone intensity
-- Be confident and high value
+STEP 1:
+Analyze emotional intent of the message.
 
-Return ONLY as a numbered list (1-5).
+STEP 2:
+Generate EXACTLY 5 completely different emotional responses.
+
+STRICT RULES:
+- Each reply must feel unique.
+- Do NOT repeat structure.
+- Do NOT repeat emotional framing.
+- Each reply 1–3 sentences.
+- Separate each reply using ONLY this symbol: |||
 
 Message:
 "${message}"
@@ -40,18 +44,15 @@ Message:
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.9
+      temperature: 0.95
     });
 
     const rawText = completion.choices[0].message.content;
 
-    // Convert numbered text into array
     const replies = rawText
-      .split("\n")
-      .filter(line => line.trim().match(/^\d/))
-      .map(line =>
-        line.replace(/^\d+[\).\s-]*/, "").trim()
-      );
+      .split("|||")
+      .map(r => r.trim())
+      .filter(r => r.length > 0);
 
     res.json({ replies });
 
