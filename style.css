@@ -99,3 +99,24 @@ function detectTones(text) {
 
   return tones;
     }
+.reply-text{
+  font-size:15px;
+  line-height:1.6;
+  margin-bottom:14px;
+}
+
+.tone-container{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.tone-badge{
+  padding:6px 12px;
+  border-radius:14px;
+  font-size:11px;
+  background:rgba(232,197,108,0.15);
+  color:#E8C56C;
+  border:1px solid rgba(232,197,108,0.4);
+  letter-spacing:0.3px;
+      }
