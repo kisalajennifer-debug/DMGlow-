@@ -30,33 +30,39 @@ async function generateReply() {
       return;
     }
 
-    data.replies.forEach(reply => {
+    /* =============================
+       MAIN REPLY (ONLY ONE)
+    ============================== */
 
-      const box = document.createElement("div");
-      box.className = "reply-box";
+    const mainReplyCard = document.createElement("div");
+    mainReplyCard.className = "main-reply-card";
+    mainReplyCard.textContent = data.replies[0];
 
-      // MAIN REPLY TEXT
-      const content = document.createElement("div");
-      content.className = "reply-content";
-      content.textContent = reply;
+    output.appendChild(mainReplyCard);
 
-      // TONE SECTION
-      const toneSection = document.createElement("div");
-      toneSection.className = "tone-section";
+    /* =============================
+       TONE CARDS
+    ============================== */
 
-      const detectedTones = detectTones(reply);
+    const tones = detectTones(data.replies[0]);
 
-      detectedTones.forEach(tone => {
-        const tag = document.createElement("span");
-        tag.className = "tone-label " + tone.class;
-        tag.textContent = tone.label;
-        toneSection.appendChild(tag);
-      });
+    tones.forEach(tone => {
 
-      box.appendChild(content);
-      box.appendChild(toneSection);
+      const toneCard = document.createElement("div");
+      toneCard.className = "tone-card";
 
-      output.appendChild(box);
+      const toneTitle = document.createElement("div");
+      toneTitle.className = "tone-title";
+      toneTitle.textContent = "Tone: " + tone.label;
+
+      const toneText = document.createElement("div");
+      toneText.className = "tone-text";
+      toneText.textContent = tone.description;
+
+      toneCard.appendChild(toneTitle);
+      toneCard.appendChild(toneText);
+
+      output.appendChild(toneCard);
     });
 
   } catch (err) {
@@ -67,93 +73,48 @@ async function generateReply() {
 
 
 /* =========================
-   SIMPLE FRONTEND TONE DETECTION
+   PREMIUM TONE STRUCTURE
 ========================= */
 
 function detectTones(text) {
 
+  const lower = text.toLowerCase();
   const tones = [];
 
-  const lower = text.toLowerCase();
-
-  if (/respect|standard|boundary|position/.test(lower)) {
-    tones.push({ label: "Authority", class: "tone-authority" });
+  if (/calm|understand|steady/.test(lower)) {
+    tones.push({
+      label: "Soft",
+      description: "This response maintains calm emotional energy and shows understanding."
+    });
   }
 
-  if (/energy|emotion|feel|intensity/.test(lower)) {
-    tones.push({ label: "Psychological", class: "tone-psychological" });
+  if (/balance|composed|clear/.test(lower)) {
+    tones.push({
+      label: "Balanced",
+      description: "This reply keeps emotional control while staying grounded and rational."
+    });
   }
 
-  if (/steady|calm|balance|composure/.test(lower)) {
-    tones.push({ label: "Smooth", class: "tone-smooth" });
+  if (/position|standard|respect/.test(lower)) {
+    tones.push({
+      label: "Elite",
+      description: "This tone communicates value, standards, and quiet authority."
+    });
   }
 
-  if (/control|frame|dominant|lead/.test(lower)) {
-    tones.push({ label: "Dominant", class: "tone-dominant" });
+  if (/control|dominant|lead|frame/.test(lower)) {
+    tones.push({
+      label: "Controlled",
+      description: "This response maintains frame control and structured leadership energy."
+    });
   }
 
-  // If nothing detected, default tone
   if (tones.length === 0) {
-    tones.push({ label: "Adaptive", class: "tone-smooth" });
+    tones.push({
+      label: "Adaptive",
+      description: "This reply adapts smoothly based on conversational context."
+    });
   }
 
   return tones;
-    }
-.reply-text{
-  font-size:15px;
-  line-height:1.6;
-  margin-bottom:14px;
-}
-
-.tone-container{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.tone-badge{
-  padding:6px 12px;
-  border-radius:14px;
-  font-size:11px;
-  background:rgba(232,197,108,0.15);
-  color:#E8C56C;
-  border:1px solid rgba(232,197,108,0.4);
-  letter-spacing:0.3px;
       }
-.main-reply-card{
-  margin-top:22px;
-  padding:26px;
-  border-radius:28px;
-  background:linear-gradient(145deg,#13283F,#0F2236);
-  border:2px solid #E8C56C;
-  box-shadow:0 0 25px rgba(232,197,108,0.35);
-  font-size:16px;
-  line-height:1.6;
-}
-
-.tone-card{
-  margin-top:18px;
-  padding:20px;
-  border-radius:24px;
-  background:#13283F;
-  border:1px solid rgba(232,197,108,0.4);
-  transition:0.3s ease;
-}
-
-.tone-card:hover{
-  box-shadow:0 0 18px rgba(232,197,108,0.35);
-  transform:translateY(-3px);
-}
-
-.tone-title{
-  font-size:13px;
-  color:#E8C56C;
-  margin-bottom:8px;
-  letter-spacing:0.5px;
-  font-weight:600;
-}
-
-.tone-text{
-  font-size:14px;
-  line-height:1.5;
-    }
