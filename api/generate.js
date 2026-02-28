@@ -1,41 +1,82 @@
-export default async function handler(req, res) {
+// api/generate.js
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  try {
-    const { message, mode } = req.body;
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are DMGlow, an emotional intelligence engine. 
-Generate 3 high-value, emotionally calibrated replies in ${mode} style.`
-          },
-          {
-            role: "user",
-            content: message
-          }
-        ]
-      })
-    });
-
-    const data = await response.json();
-
-    res.status(200).json({
-      reply: data.choices[0].message.content
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: "Something went wrong." });
-  }
+function randomize(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
+
+function expand(arr) {
+  let result = [];
+  arr.forEach(item => {
+    result.push(item);
+    result.push(item + " Intentionally.");
+    result.push(item + " With precision.");
+  });
+  return result;
+}
+
+const clusters = {
+  attraction: {
+    keywords: /love|miss|sweetheart|baby|chemistry|desire/i,
+    lines: expand([
+      "There’s warmth in that energy.",
+      "Attraction grows where calm lives.",
+      "Connection deepens when confidence stays steady."
+    ])
+  },
+
+  authority: {
+    keywords: /respect|business|standard|serious|boundary/i,
+    lines: expand([
+      "Position remains composed.",
+      "Standards define the frame.",
+      "Structure creates influence."
+    ])
+  },
+
+  emotional: {
+    keywords: /sad|hurt|confused|tired|down/i,
+    lines: expand([
+      "Emotion deserves acknowledgment.",
+      "Strength survives pressure.",
+      "Clarity comes after pause."
+    ])
+  }
+};
+
+function detectCluster(text) {
+  for (let key in clusters) {
+    if (clusters[key].keywords.test(text)) {
+      return clusters[key];
+    }
+  }
+  return clusters.attraction;
+}
+
+module.exports = function (req, res) {
+
+  const { message, intensity } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "No message provided" });
+  }
+
+  const cluster = detectCluster(message);
+
+  let replies = [];
+
+  for (let i = 0; i < 5; i++) {
+
+    let base = randomize(cluster.lines);
+
+    let reply = `${base}
+
+"${message}"
+
+— Refined at intensity level ${intensity}`;
+
+    replies.push(reply);
+  }
+
+  res.json({ replies });
+
+};
