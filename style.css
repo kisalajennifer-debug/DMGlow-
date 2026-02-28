@@ -1,120 +1,36 @@
-async function generateReply() {
+/* ===== COMPACT PREMIUM CARD ===== */
 
-  const message = document.getElementById("userInput").value.trim();
-  const intensity = document.getElementById("intensity").value;
-  const output = document.getElementById("outputArea");
-
-  if (!message) {
-    alert("Enter a message first.");
-    return;
-  }
-
-  output.innerHTML = "Generating...";
-
-  try {
-
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message, intensity })
-    });
-
-    const data = await response.json();
-
-    output.innerHTML = "";
-
-    if (!data.replies || data.replies.length === 0) {
-      output.innerHTML = "No replies generated.";
-      return;
-    }
-
-    /* =============================
-       MAIN REPLY (ONLY ONE)
-    ============================== */
-
-    const mainReplyCard = document.createElement("div");
-    mainReplyCard.className = "main-reply-card";
-    mainReplyCard.textContent = data.replies[0];
-
-    output.appendChild(mainReplyCard);
-
-    /* =============================
-       TONE CARDS
-    ============================== */
-
-    const tones = detectTones(data.replies[0]);
-
-    tones.forEach(tone => {
-
-      const toneCard = document.createElement("div");
-      toneCard.className = "tone-card";
-
-      const toneTitle = document.createElement("div");
-      toneTitle.className = "tone-title";
-      toneTitle.textContent = "Tone: " + tone.label;
-
-      const toneText = document.createElement("div");
-      toneText.className = "tone-text";
-      toneText.textContent = tone.description;
-
-      toneCard.appendChild(toneTitle);
-      toneCard.appendChild(toneText);
-
-      output.appendChild(toneCard);
-    });
-
-  } catch (err) {
-    output.innerHTML = "Error generating reply.";
-    console.error(err);
-  }
+.compact-reply-card{
+  margin-top:20px;
+  padding:18px;
+  border-radius:22px;
+  background:linear-gradient(145deg,#13283F,#0F2236);
+  border:1px solid rgba(232,197,108,0.5);
+  box-shadow:0 0 18px rgba(232,197,108,0.25);
+  font-size:14px;
 }
 
+.tone-row{
+  display:flex;
+  gap:12px;
+  margin-bottom:10px;
+  align-items:flex-start;
+}
 
-/* =========================
-   PREMIUM TONE STRUCTURE
-========================= */
+.tone-row:last-child{
+  margin-bottom:0;
+}
 
-function detectTones(text) {
+.tone-name{
+  min-width:80px;
+  font-weight:600;
+  font-size:12px;
+  color:#E8C56C;
+  letter-spacing:0.5px;
+}
 
-  const lower = text.toLowerCase();
-  const tones = [];
-
-  if (/calm|understand|steady/.test(lower)) {
-    tones.push({
-      label: "Soft",
-      description: "This response maintains calm emotional energy and shows understanding."
-    });
-  }
-
-  if (/balance|composed|clear/.test(lower)) {
-    tones.push({
-      label: "Balanced",
-      description: "This reply keeps emotional control while staying grounded and rational."
-    });
-  }
-
-  if (/position|standard|respect/.test(lower)) {
-    tones.push({
-      label: "Elite",
-      description: "This tone communicates value, standards, and quiet authority."
-    });
-  }
-
-  if (/control|dominant|lead|frame/.test(lower)) {
-    tones.push({
-      label: "Controlled",
-      description: "This response maintains frame control and structured leadership energy."
-    });
-  }
-
-  if (tones.length === 0) {
-    tones.push({
-      label: "Adaptive",
-      description: "This reply adapts smoothly based on conversational context."
-    });
-  }
-
-  return tones;
-      }
+.tone-line{
+  flex:1;
+  line-height:1.5;
+  color:#FDFCF9;
+}
