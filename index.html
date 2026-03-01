@@ -1,48 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DMGLOW CONNECT – Master Reply Engine</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMGLOW CONNECT – Master Reply Engine</title>
 
-  <!-- External CSS -->
-  <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="app">
+<div class="app">
 
-    <h1>DMGLOW CONNECT – Master Reply Engine</h1>
+<h1>DMGLOW CONNECT – Master Reply Engine</h1>
 
-    <textarea 
-      id="userInput" 
-      placeholder="Paste message here...">
-    </textarea>
+<textarea id="userInput" placeholder="Paste message here..."></textarea>
 
-    <select id="intensity">
-      <option value="auto">Auto Detect</option>
-      <option value="1">Soft</option>
-      <option value="2">Balanced</option>
-      <option value="3">Elevated</option>
-      <option value="4">Dominant</option>
-      <option value="5">Elite Controlled</option>
-    </select>
+<select id="intensity">
+<option value="auto">Auto Detect</option>
+<option value="1">Soft</option>
+<option value="2">Balanced</option>
+<option value="3">Elevated</option>
+<option value="4">Dominant</option>
+<option value="5">Elite Controlled</option>
+</select>
 
-    <!-- Output Appears Here -->
-    <div id="outputArea"></div>
+<div id="outputArea"></div>
 
-  </div>
+</div>
 
-  <!-- Fixed Bottom Button -->
-  <div class="generate-bottom">
-    <button onclick="generateReply()">
-      Generate Reply
-    </button>
-  </div>
+<div class="generate-bottom">
+<button onclick="generateReply()">Generate Replies</button>
+</div>
 
-  <!-- External JS -->
-  <script src="script.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>
