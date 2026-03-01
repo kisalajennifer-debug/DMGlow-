@@ -1,7 +1,6 @@
-async function generateReply() {
+function generateReply() {
 
   const message = document.getElementById("userInput").value.trim();
-  const intensity = document.getElementById("intensity").value;
   const output = document.getElementById("outputArea");
 
   if (!message) {
@@ -9,64 +8,44 @@ async function generateReply() {
     return;
   }
 
-  output.innerHTML = "Generating...";
+  output.innerHTML = "";
 
-  try {
+  const toneLabels = [
+    "Soft",
+    "Balanced",
+    "Elevated",
+    "Dominant",
+    "Elite Controlled"
+  ];
 
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message, intensity })
-    });
+  const replies = [
+    "I understand where you're coming from. Let’s approach this calmly and clearly:\n\n\"" + message + "\"",
 
-    const data = await response.json();
-    output.innerHTML = "";
+    "I hear your message. Here's a composed and confident reply:\n\n\"" + message + "\"",
 
-    if (!data.replies || data.replies.length === 0) {
-      output.innerHTML = "No replies generated.";
-      return;
-    }
+    "Let’s clarify this properly. My perspective on this is:\n\n\"" + message + "\"",
 
-    /* =============================
-       CREATE SEPARATE CARDS
-    ============================== */
+    "I’m addressing this directly. Here’s the position I’m taking:\n\n\"" + message + "\"",
 
-    data.replies.forEach((replyText, index) => {
+    "I move with clarity and control. This is my final response:\n\n\"" + message + "\""
+  ];
 
-      const card = document.createElement("div");
-      card.className = "reply-box";
+  replies.forEach((replyText, index) => {
 
-      // Tone Title
-      const title = document.createElement("div");
-      title.style.fontWeight = "600";
-      title.style.color = "#E8C56C";
-      title.style.marginBottom = "10px";
+    const card = document.createElement("div");
+    card.className = "reply-box";
 
-      const toneLabels = [
-        "Soft",
-        "Balanced",
-        "Elevated",
-        "Dominant",
-        "Elite Controlled"
-      ];
+    const title = document.createElement("div");
+    title.className = "tone-title";
+    title.textContent = toneLabels[index];
 
-      title.textContent = toneLabels[index] || "Elite";
+    const text = document.createElement("div");
+    text.className = "tone-text";
+    text.textContent = replyText;
 
-      // Reply Text
-      const text = document.createElement("div");
-      text.style.lineHeight = "1.6";
-      text.textContent = replyText;
+    card.appendChild(title);
+    card.appendChild(text);
 
-      card.appendChild(title);
-      card.appendChild(text);
-
-      output.appendChild(card);
-    });
-
-  } catch (err) {
-    output.innerHTML = "Error generating reply.";
-    console.error(err);
-  }
+    output.appendChild(card);
+  });
 }
