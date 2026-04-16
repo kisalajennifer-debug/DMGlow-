@@ -1,39 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMGLOW CONNECT – Master Reply Engine</title>
-
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Content Studio V10</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="app">
+  <div class="container">
 
-<h1>DMGLOW CONNECT – Master Reply Engine</h1>
+    <h1>Content Studio V10</h1>
 
-<textarea id="userInput" placeholder="Paste message here..."></textarea>
+    <input id="topicInput" type="text" placeholder="Type your topic here...">
+    
+    <button onclick="generateContent()">Generate</button>
+    <button onclick="copyAll()">Copy All</button>
 
-<select id="intensity">
-<option value="auto">Auto Detect</option>
-<option value="1">Soft</option>
-<option value="2">Balanced</option>
-<option value="3">Elevated</option>
-<option value="4">Dominant</option>
-<option value="5">Elite Controlled</option>
-</select>
+    <div class="grid">
 
-<div id="outputArea"></div>
+      <div class="card">
+        <h3>YouTube</h3>
+        <p id="youtube"></p>
+        <button onclick="copyText('youtube')">Copy</button>
+      </div>
 
-</div>
+      <div class="card">
+        <h3>TikTok</h3>
+        <p id="tiktok"></p>
+        <button onclick="copyText('tiktok')">Copy</button>
+      </div>
 
-<div class="generate-bottom">
-<button onclick="generateReply()">Generate Replies</button>
-</div>
+      <div class="card">
+        <h3>Facebook</h3>
+        <p id="facebook"></p>
+        <button onclick="copyText('facebook')">Copy</button>
+      </div>
 
-<script src="script.js"></script>
+      <div class="card">
+        <h3>X (Twitter)</h3>
+        <p id="x"></p>
+        <button onclick="copyText('x')">Copy</button>
+      </div>
 
+      <div class="card">
+        <h3>LinkedIn</h3>
+        <p id="linkedin"></p>
+        <button onclick="copyText('linkedin')">Copy</button>
+      </div>
+
+      <div class="card">
+        <h3>Instagram</h3>
+        <p id="instagram"></p>
+        <button onclick="copyText('instagram')">Copy</button>
+      </div>
+
+      <div class="card">
+        <h3>WhatsApp</h3>
+        <p id="whatsapp"></p>
+        <button onclick="copyText('whatsapp')">Copy</button>
+      </div>
+
+      <div class="card">
+        <h3>Community</h3>
+        <p id="community"></p>
+        <button onclick="copyText('community')">Copy</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
